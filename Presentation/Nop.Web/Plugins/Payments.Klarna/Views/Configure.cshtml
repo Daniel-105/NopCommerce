@@ -1,0 +1,54 @@
+﻿@model Nop.Plugin.Payments.Klarna.Models.ConfigurationModel
+@inject Nop.Core.IWebHelper webHelper
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="PaymentKlarna" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div style="display:flex; flex-direction:column;">
+                    <div style="display:flex;">
+                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;"> 
+                        <label for="UsePayground">Use Playground</label>
+                    </div>
+                    <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
+                        <h1>Klarna Payment Credentials</h1>
+                        <label for="RealUserName">UserName</label>
+                        <input type="text" id="RealUserName" name="RealUserName" style="width:300px;">
+
+                        <label for="RealPassword">Password</label>
+                        <input type="password" id="RealPassword" name="RealPassword" style="width:300px;">
+                    </div>    
+                    <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
+                        <h1>Playground Credentials</h1>
+                        <label for="paygroundUserName">UserName</label>
+                        <input type="text" id="paygroundUserName" name="paygroundUserName" style="width:300px;">
+
+                        <label for="paygroundPassword">Password</label>
+                        <input type="password" id="paygroundPassword" name="paygroundPassword" style="width:300px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    let usePlayground = document.querySelector('#usePlayground');
+    let playgroundCredentialsDiv = document.querySelector('#playgroundCredentialsDiv');
+    let realCredentialsDiv = document.querySelector('#realCredentialsDiv');
+    usePlayground.addEventListener("change", () => {
+        if (usePlayground.checked) {
+            playgroundCredentialsDiv.style.display = "flex";
+            realCredentialsDiv.style.display = "none";
+        } else {
+            playgroundCredentialsDiv.style.display = "none";
+            realCredentialsDiv.style.display = "flex";
+        }
+    });
+
+
+</script>

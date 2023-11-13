@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Klarna Payments",
+  "SystemName": "Payments.Klarna",
+  "Version": "1.16",
+  "SupportedVersions": [ "4.60" ],
+  "Author": "Daniel Infante",
+  "DisplayOrder": -1,
+  "FileName": "Nop.Plugin.Payments.Klarna.dll",
+  "Description": "This plugin will allow you to pay in 3 invokations"
+}

@@ -1,0 +1,108 @@
+﻿@model Nop.Plugin.Payments.Klarna.Models.PaymentInfoModel
+@*@inject Nop.Core.Domain.Orders.OrderSettings orderSettings
+    @inject Nop.Plugin.Payments.Qualpay.QualpaySettings qualpaySettings*@
+
+@{
+    Layout = "";
+    //Html.AddScriptParts(ResourceLocation.Footer, Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsScriptPath, excludeFromBundle: true);
+    //Html.AddCssFileParts(Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsStylePath, excludeFromBundle: true);
+}
+
+<table width="100%" cellspacing="2" cellpadding="1" border="0" id="qualpay-card-details">
+    <style type='text/css'>
+        @@media (max-width: 422px) {
+            #qp-embedded-container {
+                height: 12em;
+            }
+        }
+    </style>
+    <tr>
+        @{
+            var first = true;
+        }
+        @foreach (var item in Model.AvailableTypes)
+        {
+            <td>
+                @if (first)
+                {
+                    first = false;
+                    <input type="radio" asp-for="SelectedType" value="@item" id="SelectedType_@(item)" checked>
+                }
+                else
+                {
+                    <input type="radio" asp-for="SelectedType" value="@item" id="SelectedType_@(item)">
+                }
+                <label for="SelectedType_@(item)">@item</label>
+            </td>
+        }
+    </tr>
+    <tr>
+        <td>
+            <label asp-for="Name">@T("Plugins.Payments.EasyPay.Customer.Name"):</label>
+        </td>
+        <td>
+            @*<input type="text" asp-for="Name" style="width: 165px;" />*@
+            <input type="text" asp-for="Name" />
+            <span asp-validation-for="Name"></span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label asp-for="Email">@T("Plugins.Payments.EasyPay.Customer.Email"):</label>
+        </td>
+        <td>
+            @*<input type="text" asp-for="Email" style="width: 165px;" />*@
+            <input type="text" asp-for="Email" />
+            <span asp-validation-for="Email"></span>
+        </td>
+    </tr>
+    <tr id="trPhoneIndicative">
+        <td>
+            <label asp-for="PhoneIndicative">@T("Plugins.Payments.EasyPay.Customer.PhoneIndicative"):</label>
+        </td>
+        <td>
+            @*<input type="text" asp-for="PhoneIndicative" style="width: 65px;" />*@
+            <input type="text" asp-for="PhoneIndicative" />
+            <span asp-validation-for="PhoneIndicative"></span>
+        </td>
+    </tr>
+    <tr id="trPhone">
+        <td>
+            <label asp-for="Phone">@T("Plugins.Payments.EasyPay.Customer.Phone"):</label>
+        </td>
+        <td>
+            @*<input type="text" asp-for="Phone" style="width: 165px;" />*@
+            <input type="text" asp-for="Phone" />
+            <span asp-validation-for="Phone"></span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label asp-for="FiscalNumber">@T("Plugins.Payments.EasyPay.Customer.FiscalNumber"):</label>
+        </td>
+        <td>
+            @*<input type="text" asp-for="FiscalNumber" style="width: 165px;" />*@
+            <input type="text" asp-for="FiscalNumber" />
+            <span asp-validation-for="FiscalNumber"></span>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function proccessRadioButton(value) {
+        if (value == '@Model.PaymentExtraFieldsShowOn') {
+            $('#trPhoneIndicative').show();
+            $('#trPhone').show();
+        }
+        else {
+            $('#trPhoneIndicative').hide();
+            $('#trPhone').hide();
+        }
+    }
+    proccessRadioButton($('input[name=SelectedType]:checked').val());
+    $('input[type=radio][name=SelectedType]').change(function () {
+        proccessRadioButton(this.value);
+    });
+</script>
+
+@*@Html.NopInlineScripts(ResourceLocation.Footer)*@

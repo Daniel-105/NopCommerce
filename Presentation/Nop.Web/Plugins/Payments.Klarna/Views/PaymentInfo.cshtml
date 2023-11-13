@@ -1,0 +1,194 @@
+﻿@model Nop.Plugin.Payments.Klarna.Models.PaymentInfoModel
+
+@*@inject Nop.Core.Domain.Orders.OrderSettings orderSettings
+    @inject Nop.Plugin.Payments.Qualpay.QualpaySettings qualpaySettings*@
+
+@{
+    Layout = "";
+    //Html.AddScriptParts(ResourceLocation.Footer, Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsScriptPath, excludeFromBundle: true);
+    //Html.AddCssFileParts(Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsStylePath, excludeFromBundle: true);
+}
+
+<style>
+    .klarnaBtn {
+        width: 500px;
+        height: 50px;
+        margin: auto;
+        cursor: pointer;
+        background-color: #c98f8b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 20px;
+    }
+</style>
+
+
+
+<div id="klarna_container" style="width: 500px; margin: auto;"></div>
+
+<div style="width: 500px; margin: 20px auto ;">
+    <!--Button to trigger authorize call-->
+    <div id="klarnaRequest" class="klarnaBtn">Klarna Payment</div>
+</div>
+
+<!script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></!script>
+<!script type="text/javascript" src="//x.klarnacdn.net/kp/lib/v1/api.js" async></!script>
+
+
+<script type="text/javascript">
+    let klarnaRequest = document.querySelector("#klarnaRequest");
+    let authorizationToken = "";
+
+
+
+    $(document).ready(function () {
+        console.log("You clicked the button");
+        $.ajax({
+            type: "POST",
+            url: "/GetClientToken",
+            success: function (data) {
+                dataResponse = data;
+                let jsonData = JSON.parse(dataResponse);
+                let client_token = jsonData.client_token;
+                let identifier = jsonData.payment_method_categories[0].identifier;
+                console.log(client_token);
+                console.log(identifier);
+                createSession(client_token, identifier);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("An error occurred:", errorThrown);
+            }
+        });
+    });
+
+    function createSession(client_token, identifier) {
+        //The following method initializes the Klarna Payments JS library
+        klarnaAsyncCallback = function () {
+            Klarna.Payments.init({
+                client_token: client_token
+            });
+            console.log("Payments initialized");
+            //The following method loads the payment_method_category in the container with the id of 'klarna_container'
+            Klarna.Payments.load({
+                container: '#klarna_container',
+                payment_method_category: identifier
+
+            },
+                function (res) {
+                    console.log("Load function called")
+                    console.debug(res);
+                });
+        };
+        klarnaAsyncCallback();
+    }
+
+    /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
+    The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
+    klarnaRequest.addEventListener("click", () => {
+
+        Klarna.Payments.authorize({
+            payment_method_category: 'pay_later'
+        },
+            {
+                purchase_country: "PT",
+                purchase_currency: "EUR",
+                locale: "pt-PT",
+                order_amount: 20000,
+                order_tax_amount: 0,
+                order_lines: [{
+                    type: "physical",
+                    reference: "19-402",
+                    name: "black T-Shirt",
+                    quantity: 2,
+                    unit_price: 5000,
+                    tax_rate: 0,
+                    total_amount: 10000,
+                    total_discount_amount: 0,
+                    total_tax_amount: 0
+                },
+                {
+                    type: "physical",
+                    reference: "123123",
+                    name: "red trousers",
+                    quantity: 1,
+                    unit_price: 10000,
+                    tax_rate: 0,
+                    total_amount: 10000,
+                    total_discount_amount: 0,
+                    total_tax_amount: 0
+                }],
+            }, function (res) {
+                console.log("Response from the authorize call:");
+                console.log(res);
+                authorizationToken = res["authorization_token"];
+                //authorizationToken = { "authorizationToken": res["authorization_token"] }
+                console.log(authorizationToken);
+                //let authorizationToken = res["authorization_token"];
+                //console.log(`${authorizationToken} is of type ${typeof authorizationToken}`)
+                //placeOrderButton.style.display = "block";
+                confirm();
+
+            })
+    });
+
+    function confirm() {
+        console.log(authorizationToken);
+        let data = { "authorizationToken": authorizationToken }
+        $.ajax({
+            type: "POST",
+            url: "/PlaceOrder",
+            data: data,
+            dataType: "text",
+            success: function (response) {
+                let parsedReponse = JSON.parse(JSON.parse(response));
+                console.log(response);
+
+                console.log(typeof parsedReponse);
+                console.log(parsedReponse.fraud_status);
+                if (parsedReponse.fraud_status == "ACCEPTED") {
+                    // Swal.fire({
+                    //     icon: 'success',
+                    //     title: 'Your payment has been correctly processed',
+                    //     showConfirmButton: false,
+                    // });
+                    sendToPaymentProcessor();
+
+                    // document.querySelector("button").click();
+
+                    // window.location.href = @Url.Action("ProcessPaymentAsync" , "KlarnaPayment");
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                    // window.location.href = "/checkout/completed";
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("An error occurred:", errorThrown);
+            }
+        });
+
+    }
+
+    //TODO verificar valor recaptcha
+    function sendToPaymentProcessor() {
+        var url = "@Url.Action("Confirm", "Checkout")";
+        $.ajax({
+            type: "POST",
+            data: {
+                captchaValid: true,
+                existValid: "false"
+            },
+            url: url,
+            success: function (response) {
+                alert("sucess");
+                window.location.href = "/checkout/completed";
+            }
+        })
+    }
+</script>
