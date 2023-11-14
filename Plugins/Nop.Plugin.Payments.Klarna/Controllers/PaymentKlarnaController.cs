@@ -38,8 +38,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             ISettingService settingService,
             IStoreContext storeContext,
             IHttpClientFactory httpClientFactory,
-                        IWorkContext workContext,
-
+            IWorkContext workContext,
+            IShoppingCartModelFactory shoppingCartModelFactory,
             IPaymentService paymentService)
         {
             this._localizationService = localizationService;
@@ -49,6 +49,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             _httpClient = httpClientFactory.CreateClient();
             this._paymentService = paymentService;
             _workContext = workContext;
+            _shoppingCartModelFactory = shoppingCartModelFactory;
 
         }
         public async Task<IActionResult> Configure()
@@ -165,12 +166,10 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             string password = "qSNhaFgn6Ls3bj1P";
 
             var store = await _storeContext.GetCurrentStoreAsync();
+            var storeid = store.Id;
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
-            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
-            var count = model.Items.Count();
-
-            //var productName = model.Items.FirstOrDefault(x =>x.ProductName);
+            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart);
 
 
             // Create JSON data to send in the request
@@ -342,5 +341,4 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
         private readonly IStoreContext _storeContext;
     }
-:w
-        }
+}
