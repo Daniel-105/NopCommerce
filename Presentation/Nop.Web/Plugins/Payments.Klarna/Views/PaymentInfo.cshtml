@@ -1,5 +1,4 @@
-﻿@model Nop.Plugin.Payments.Klarna.Models.PaymentInfoModel
-
+﻿@model Nop.Web.Models.ShoppingCart.ShoppingCartModel
 @*@inject Nop.Core.Domain.Orders.OrderSettings orderSettings
     @inject Nop.Plugin.Payments.Qualpay.QualpaySettings qualpaySettings*@
 
@@ -35,7 +34,15 @@
 
 <!script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></!script>
 <!script type="text/javascript" src="//x.klarnacdn.net/kp/lib/v1/api.js" async></!script>
-
+<div>@Model.Items.Count</div>
+@foreach(var item in Model.Items)
+{
+    <div>@item.SubTotal</div>
+    <div>@item.Quantity</div>
+    <div>@item.ProductName</div>
+    <div>@item.Sku</div>
+    <div>id: @item.ProductId</div>
+}
 <script type="text/javascript">
     let klarnaRequest = document.querySelector("#klarnaRequest");
     let authorizationToken = "";
@@ -94,16 +101,16 @@
                 purchase_country: "PT",
                 purchase_currency: "EUR",
                 locale: "pt-PT",
-                order_amount: 20000,
+                order_amount: 20000, //Model.Items.Count
                 order_tax_amount: 0,
                 order_lines: [{
                     type: "physical",
                     reference: "19-402",
-                    name: "black T-Shirt",
-                    quantity: 2,
-                    unit_price: 5000,
+                    name: "black T-Shirt", //Model.Items.ProductName
+                    quantity: 2, //Model.Items.Quantity
+                    unit_price: 5000, //Model.Items.UnitPrice
                     tax_rate: 0,
-                    total_amount: 10000,
+                    total_amount: 10000, //Model.Items.SubTotal
                     total_discount_amount: 0,
                     total_tax_amount: 0
                 },
