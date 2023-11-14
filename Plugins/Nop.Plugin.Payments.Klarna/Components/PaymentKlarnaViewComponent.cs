@@ -3,6 +3,8 @@ using Nop.Core;
 using Nop.Services.Localization;
 using Nop.Web.Framework.Components;
 using Nop.Plugin.Payments.Klarna.Models;
+using Nop.Web.Models.Order;
+using Nop.Web.Models.ShoppingCart;
 
 namespace Nop.Plugin.Payments.Klarna.Components
 {
@@ -31,11 +33,12 @@ namespace Nop.Plugin.Payments.Klarna.Components
         {
             var store = await _storeContext.GetCurrentStoreAsync();
 
-            var model = new PaymentInfoModel
+            var model = new PaymentInfoModel()
             {
                 DescriptionText = await _localizationService.GetLocalizedSettingAsync(_klarnaPaymentSettings,
                     x => x.DescriptionText, (await _workContext.GetWorkingLanguageAsync()).Id, store.Id)
             };
+            //var model = new MiniShoppingCartModel();
 
             return View("~/Plugins/Payments.Klarna/Views/PaymentInfo.cshtml", model);
         }

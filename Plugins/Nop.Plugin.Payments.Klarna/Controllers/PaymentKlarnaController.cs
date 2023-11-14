@@ -15,6 +15,8 @@ using Nop.Services.Payments;
 using Nop.Plugin.Payments.Klarna;
 using Nop.Services.Payments;
 using Nop.Core.Http.Extensions;
+using Nop.Web.Models.Order;
+using Nop.Web.Models.ShoppingCart;
 
 namespace Nop.Plugin.Payments.Klarna.Controllers
 {
@@ -145,6 +147,13 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             // Replace with your Basic Authentication credentials
             string username = "PK131523_f3731dbad121";
             string password = "qSNhaFgn6Ls3bj1P";
+            OrderDetailsModel orderDetailsModel = new OrderDetailsModel();
+            PaymentInfoModel paymentInfoModel = new PaymentInfoModel();
+            WishlistModel wishlistModel = new WishlistModel();
+            MiniShoppingCartModel miniShoppingCartModel = new MiniShoppingCartModel();
+            var subtotal = miniShoppingCartModel.SubTotal;
+            Console.WriteLine(subtotal);
+
 
             // Create JSON data to send in the request
             string jsonData = @"

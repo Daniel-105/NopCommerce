@@ -1,4 +1,5 @@
-﻿using Nop.Web.Framework.Models;
+﻿using Nop.Web.Areas.Admin.Models.ShoppingCart;
+using Nop.Web.Framework.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,5 +28,7 @@ namespace Nop.Plugin.Payments.Klarna.Models
 
         public string FiscalNumber { get; set; }
         public string DescriptionText { get; internal set; }
+
+        public ShoppingCartModel ShoppingCartModel { get; set; }
     }
 }

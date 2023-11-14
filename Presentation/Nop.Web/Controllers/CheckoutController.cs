@@ -1272,8 +1272,12 @@ namespace Nop.Web.Controllers
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
             //TODO verifica se nãoé payment.Karna
-            if (_orderSettings.OnePageCheckoutEnabled)
+            var paymentMethod = await _genericAttributeService.GetAttributeAsync<string>(customer,
+                    NopCustomerDefaults.SelectedPaymentMethodAttribute, store.Id);
+            if (_orderSettings.OnePageCheckoutEnabled && paymentMethod != "Payments.Klarna")
+            {
                 return RedirectToRoute("CheckoutOnePage");
+            }
 
             if (await _customerService.IsGuestAsync(customer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
