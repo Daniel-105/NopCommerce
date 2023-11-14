@@ -17,9 +17,9 @@ using Nop.Services.Payments;
 using Nop.Core.Http.Extensions;
 using Nop.Web.Models.Order;
 using Nop.Web.Models.ShoppingCart;
-using Nop.Services.Orders;
-using Nop.Web.Areas.Admin.Factories;
 using Nop.Core.Domain.Orders;
+using Nop.Services.Orders;
+using Nop.Web.Factories;
 
 namespace Nop.Plugin.Payments.Klarna.Controllers
 {
@@ -27,37 +27,20 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
     [Area("Admin")]
     public class PaymentKlarnaController : BasePaymentController
     {
-
+ 
         private readonly HttpClient _httpClient;
         private readonly IPaymentService _paymentService;
-        private readonly KlarnaPaymentSettings _klarnaPaymentSettings;
-        private readonly ILocalizationService _localizationServiceCart;
-        private readonly IStoreContext _storeContextCart;
-        private readonly IWorkContext _workContext;
         private readonly IShoppingCartService _cart;
+        private readonly IWorkContext _workContext;
         private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
-
-        public PaymentKlarnaController(ILocalizationService localizationServiceCart, 
-            IPermissionService permissionService, 
-            ISettingService settingService,
-            IStoreContext storeContextCart,
-            IHttpClientFactory httpClientFactory, 
-            IPaymentService paymentService,
-            KlarnaPaymentSettings klarnaPaymentSettings,
-            IShoppingCartService cart,
-            IWorkContext workContext,
-            IShoppingCartModelFactory shoppingCartModelFactory)
+        public PaymentKlarnaController(ILocalizationService localizationService, IPermissionService permissionService, ISettingService settingService, IStoreContext storeContext, IHttpClientFactory httpClientFactory, IPaymentService paymentService)
         {
-            this._localizationServiceCart = localizationServiceCart;
+            this._localizationService = localizationService;
             this._permissionService = permissionService;
             this._settingService = settingService;
-            this._storeContextCart = storeContextCart;
+            this._storeContext = storeContext;
             _httpClient = httpClientFactory.CreateClient();
             this._paymentService = paymentService;
-            this._klarnaPaymentSettings = klarnaPaymentSettings;
-            this._workContext = workContext;
-            this._cart = cart;
-           this._shoppingCartModelFactory = shoppingCartModelFactory;
         }
         public async Task<IActionResult> Configure()
         {
@@ -105,8 +88,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             }
             return result;
         }
-
-
+ 
+ 
         [HttpPost]
         //[AdminAntiForgery(false)]
         [IgnoreAntiforgeryToken]
@@ -152,21 +135,22 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMin, model.SantanderConsumerMin_OverrideForStore, activeStoreScopeConfiguration, false);
                     await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMax, model.SantanderConsumerMax_OverrideForStore, activeStoreScopeConfiguration, false);
                     await this._settingService.ClearCacheAsync();
-
+ 
                     //this.SuccessNotification(await this._localizationService.GetResourceAsync("Admin.Plugins.Saved"), true);
                     result = await this.Configure();
                 }
             }
             return result;
         }
-
+ 
         [Route("/GetClientToken")]
         [HttpPost]
         public async Task<JsonResult> GetClientToken()
         {
+ 
             // Replace with your actual API endpoint URL
             string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
-
+ 
             // Replace with your Basic Authentication credentials
             string username = "PK131523_f3731dbad121";
             string password = "qSNhaFgn6Ls3bj1P";
@@ -174,10 +158,12 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             var store = await _storeContext.GetCurrentStoreAsync();
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
-            //var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
-            var model = await _shoppingCartModelFactory.PrepareShoppingCartItemListModelAsync(modelShopping,);
+            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
+            var count = model.Items.Count();
 
-
+            //var productName = model.Items.FirstOrDefault(x =>x.ProductName);
+ 
+ 
             // Create JSON data to send in the request
             string jsonData = @"
         {
@@ -211,24 +197,24 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 }
             ]
         }";
-
+ 
             try
             {
                 // Set Basic Authentication credentials
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}")));
-
+ 
                 // Set the Content-Type header to application/json
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+ 
                 // Send a POST request with JSON content
                 HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(jsonData, Encoding.UTF8, "application/json"));
-
+ 
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response body as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
                     //JObject json = JObject.Parse(responseContent);
-
+ 
                     // Return the JSON data as a JsonResult
                     return Json(responseContent);
                 }
@@ -243,19 +229,19 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 return Json(new { error = "An error occurred: " + ex.Message });
             }
         }
-
-
+ 
+ 
         [Route("/PlaceOrder")]
         [HttpPost]
         public async Task<IActionResult> PlaceOrder(string authorizationToken)
         {
             // Replace with your actual API endpoint URL
             string apiUrl = "https://api.playground.klarna.com/payments/v1/authorizations/" + authorizationToken + "/order";
-
+ 
             // Replace with your Basic Authentication credentials
             string username = "PK131523_f3731dbad121";
             string password = "qSNhaFgn6Ls3bj1P";
-
+ 
             // Create JSON data to send in the request
             string jsonData = @"
         {
@@ -289,38 +275,38 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 }
             ]
         }";
-
+ 
             try
             {
                 // Set Basic Authentication credentials
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}")));
-
+ 
                 // Set the Content-Type header to application/json
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+ 
                 // Send a POST request with JSON content
                 HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(jsonData, Encoding.UTF8, "application/json"));
-
+ 
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response body as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
                     JObject json = JObject.Parse(responseContent);
-
+ 
                     var typeJson = json.GetType();
                     //var jsonResponse = JsonSerializer.Deserialize<JsonObject>(responseContent);
-
+ 
                     // Return the JSON data as a JsonResult
                     //return Json(responseContent);
                     //return RedirectToAction("ProcessPaymentAsync", "PaymentKlarna");
-
+ 
                     //I'm changing this variable.
                     //trying to find why don't I have access to ProcessPaymentRequest
-
-
+ 
+ 
                     //TODO criar variavel de sessão HttpContext.Session.Get<ProcessPaymentRequest>("OrderPaymentInfo"); e popular com os dados
                     HttpContext.Session.Set<ProcessPaymentRequest>("OrderPaymentInfo", new ProcessPaymentRequest());
-
+ 
                     return Json(responseContent);
                 }
                 else
@@ -329,25 +315,22 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     return Json(new { error = "API request failed" });
                 }
             }
-
-
-
+ 
+ 
             catch (Exception ex)
             {
                 return Json(new { error = "An error occurred: " + ex.Message });
             }
         }
-       
         private readonly ILocalizationService _localizationService;
-
-
+ 
+ 
         private readonly IPermissionService _permissionService;
-
-
+ 
+ 
         private readonly ISettingService _settingService;
-
-
+ 
+ 
         private readonly IStoreContext _storeContext;
-
     }
 }
