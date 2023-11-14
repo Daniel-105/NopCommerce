@@ -17,6 +17,9 @@ using Nop.Services.Payments;
 using Nop.Core.Http.Extensions;
 using Nop.Web.Models.Order;
 using Nop.Web.Models.ShoppingCart;
+using Nop.Services.Orders;
+using Nop.Web.Areas.Admin.Factories;
+using Nop.Core.Domain.Orders;
 
 namespace Nop.Plugin.Payments.Klarna.Controllers
 {
@@ -27,14 +30,34 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
         private readonly HttpClient _httpClient;
         private readonly IPaymentService _paymentService;
-        public PaymentKlarnaController(ILocalizationService localizationService, IPermissionService permissionService, ISettingService settingService, IStoreContext storeContext, IHttpClientFactory httpClientFactory, IPaymentService paymentService)
+        private readonly KlarnaPaymentSettings _klarnaPaymentSettings;
+        private readonly ILocalizationService _localizationServiceCart;
+        private readonly IStoreContext _storeContextCart;
+        private readonly IWorkContext _workContext;
+        private readonly IShoppingCartService _cart;
+        private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
+
+        public PaymentKlarnaController(ILocalizationService localizationServiceCart, 
+            IPermissionService permissionService, 
+            ISettingService settingService,
+            IStoreContext storeContextCart,
+            IHttpClientFactory httpClientFactory, 
+            IPaymentService paymentService,
+            KlarnaPaymentSettings klarnaPaymentSettings,
+            IShoppingCartService cart,
+            IWorkContext workContext,
+            IShoppingCartModelFactory shoppingCartModelFactory)
         {
-            this._localizationService = localizationService;
+            this._localizationServiceCart = localizationServiceCart;
             this._permissionService = permissionService;
             this._settingService = settingService;
-            this._storeContext = storeContext;
+            this._storeContextCart = storeContextCart;
             _httpClient = httpClientFactory.CreateClient();
             this._paymentService = paymentService;
+            this._klarnaPaymentSettings = klarnaPaymentSettings;
+            this._workContext = workContext;
+            this._cart = cart;
+           this._shoppingCartModelFactory = shoppingCartModelFactory;
         }
         public async Task<IActionResult> Configure()
         {
@@ -147,12 +170,12 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             // Replace with your Basic Authentication credentials
             string username = "PK131523_f3731dbad121";
             string password = "qSNhaFgn6Ls3bj1P";
-            OrderDetailsModel orderDetailsModel = new OrderDetailsModel();
-            PaymentInfoModel paymentInfoModel = new PaymentInfoModel();
-            WishlistModel wishlistModel = new WishlistModel();
-            MiniShoppingCartModel miniShoppingCartModel = new MiniShoppingCartModel();
-            var subtotal = miniShoppingCartModel.SubTotal;
-            Console.WriteLine(subtotal);
+
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
+            var modelShopping = new ShoppingCartModel();
+            //var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
+            var model = await _shoppingCartModelFactory.PrepareShoppingCartItemListModelAsync(modelShopping,);
 
 
             // Create JSON data to send in the request
@@ -325,5 +348,6 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
 
         private readonly IStoreContext _storeContext;
+
     }
 }
