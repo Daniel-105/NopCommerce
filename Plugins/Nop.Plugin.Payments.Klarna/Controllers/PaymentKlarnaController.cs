@@ -220,8 +220,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             ""order_lines"": [
                 {
                     ""type"": ""physical"",
-                    ""reference"": ""reference1"",
-                    ""name"": ""black T-Shirt"",
+                    ""reference"": ""@reference1"",
+                    ""name"": ""@productName1"",
                     ""quantity"": ""@quantity1"",
                     ""unit_price"": ""@unitPrice1"",
                     ""tax_rate"": 0,
@@ -231,8 +231,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 },
                 {
                     ""type"": ""physical"",
-                    ""reference"": ""reference2"",
-                    ""name"": ""red trousers"",
+                    ""reference"": ""@reference2"",
+                    ""name"": ""@productName2"",
                     ""quantity"": ""@quantity2"",
                     ""unit_price"": ""@unitPrice2"",
                     ""tax_rate"": 0,
@@ -256,6 +256,9 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             string tAmount1 = modelValue[1][0].ToString().Replace(".", "");
             string tAmount2 = modelValue[2][0].ToString().Replace(".", "");
 
+            var productName1 = modelValue[1][3];
+            var productName2 = modelValue[2][3];
+
             Dictionary<string, string> replacements = new Dictionary<string, string>
             {
                 {"@total", strTotal},
@@ -266,7 +269,9 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 {"@reference1", reference1},
                 {"@reference2", reference2},
                 {"@tAmount1", tAmount1},
-                {"@tAmount2", tAmount2}
+                {"@tAmount2", tAmount2},
+                {"@productName1", $"\"{productName1}\""},
+                {"@productName2",  $"\"{productName2}\""}
             };
 
             foreach (var replacement in replacements)
