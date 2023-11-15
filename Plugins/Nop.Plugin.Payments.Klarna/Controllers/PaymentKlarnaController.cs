@@ -175,11 +175,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
             var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
-            // what data do I need?
-            // Order amount 
-            //amount of products in the cart - 2
+            
             var amountOfItems = model.Items.Count();
-            int loopCount = 1;
             decimal total = 0;
 
             Dictionary<int, List<decimal>> modelValue = new Dictionary<int, List<decimal>>();
@@ -204,19 +201,10 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 modelValue[reference].Add(quantity);
                 modelValue[reference].Add(unitPrice);
 
-                // Accessing the list for a specific product (e.g., ProductId = 1)
-                var product1Values = modelValue[1];
-                var orderAmountP1 = modelValue[1][0];
-
-                // Calculate total amount (by product) using the values in the list
-                var totalAmount = product1Values.Sum(); // Assuming you want to sum up all values in the list
-
                 total = total + modelValue[reference][0];
-                loopCount++;
             }
-            var total1 = total;
 
-
+            
 
 
             // Create JSON data to send in the request
