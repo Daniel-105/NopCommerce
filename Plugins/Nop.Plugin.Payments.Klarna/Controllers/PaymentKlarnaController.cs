@@ -175,7 +175,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
             var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
-            
+
             var amountOfItems = model.Items.Count();
             decimal total = 0;
 
@@ -204,7 +204,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 total = total + modelValue[reference][0];
             }
 
-            
+
 
 
             // Create JSON data to send in the request
@@ -213,7 +213,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             ""purchase_country"": ""PT"",
             ""purchase_currency"": ""EUR"",
             ""locale"": ""pt-PT"",
-            ""order_amount"": 20000,
+            ""order_amount"": @total,
             ""order_tax_amount"": 0,
             ""order_lines"": [
                 {
@@ -240,6 +240,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 }
             ]
         }";
+
+            jsonData = jsonData.Replace("@total", total.ToString().Replace(".", ""));
 
             try
             {
@@ -376,4 +378,4 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
         private readonly IStoreContext _storeContext;
     }
-}
+    }
