@@ -179,29 +179,31 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             var amountOfItems = model.Items.Count();
             decimal total = 0;
 
-            Dictionary<int, List<decimal>> modelValue = new Dictionary<int, List<decimal>>();
+            Dictionary<int, List<object>> modelValue = new Dictionary<int, List<object>>();
 
             foreach (var item in model.Items)
             {
                 // total amount of each product
-                var orderAmount = Decimal.Parse(item.SubTotal.TrimStart('$')); // Parse as decimal
+                var totalAmount = Decimal.Parse(item.SubTotal.TrimStart('$')); // Parse as decimal
                 var reference = item.ProductId;
                 var quantity = item.Quantity;
                 var unitPrice = Decimal.Parse(item.UnitPrice.TrimStart('$')); // Parse as decimal
+                var productName = item.ProductName;
 
                 // Check if the key (reference) exists in the dictionary
                 if (!modelValue.ContainsKey(reference))
                 {
                     // If the key doesn't exist, create a new list and add it to the dictionary
-                    modelValue[reference] = new List<decimal>();
+                    modelValue[reference] = new List<object>();
                 }
 
-                // Populating the key with order amount, quantity, and unit price
-                modelValue[reference].Add(orderAmount);
+                // Populating the key with order amount, quantity, unit price, and product name
+                modelValue[reference].Add(totalAmount);
                 modelValue[reference].Add(quantity);
                 modelValue[reference].Add(unitPrice);
+                modelValue[reference].Add(productName);
 
-                total = total + modelValue[reference][0];
+                total = total + (decimal)modelValue[reference][0];
             }
 
 
@@ -213,35 +215,64 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             ""purchase_country"": ""PT"",
             ""purchase_currency"": ""EUR"",
             ""locale"": ""pt-PT"",
-            ""order_amount"": @total,
+            ""order_amount"": ""@total"",
             ""order_tax_amount"": 0,
             ""order_lines"": [
                 {
                     ""type"": ""physical"",
-                    ""reference"": ""19-402"",
+                    ""reference"": ""reference1"",
                     ""name"": ""black T-Shirt"",
-                    ""quantity"": 2,
-                    ""unit_price"": 5000,
+                    ""quantity"": ""@quantity1"",
+                    ""unit_price"": ""@unitPrice1"",
                     ""tax_rate"": 0,
-                    ""total_amount"": 10000,
+                    ""total_amount"": ""@tAmount1"",
                     ""total_discount_amount"": 0,
                     ""total_tax_amount"": 0
                 },
                 {
                     ""type"": ""physical"",
-                    ""reference"": ""123123"",
+                    ""reference"": ""reference2"",
                     ""name"": ""red trousers"",
-                    ""quantity"": 1,
-                    ""unit_price"": 10000,
+                    ""quantity"": ""@quantity2"",
+                    ""unit_price"": ""@unitPrice2"",
                     ""tax_rate"": 0,
-                    ""total_amount"": 10000,
+                    ""total_amount"": ""@tAmount2"",
                     ""total_discount_amount"": 0,
                     ""total_tax_amount"": 0
                 }
             ]
         }";
+            string strTotal = total.ToString().Replace(".", "");
+            string quantity1 = modelValue[1][1].ToString();
+            string quantity2 = modelValue[2][1].ToString();
 
-            jsonData = jsonData.Replace("@total", total.ToString().Replace(".", ""));
+            // For unitPrice
+            string unitPrice1 = modelValue[1][2].ToString().Replace(".", "");
+            string unitPrice2 = modelValue[2][2].ToString().Replace(".", "");
+
+            string reference1 = modelValue.Keys.FirstOrDefault().ToString();
+            string reference2 = modelValue.Keys.Skip(1).FirstOrDefault().ToString();
+
+            string tAmount1 = modelValue[1][0].ToString().Replace(".", "");
+            string tAmount2 = modelValue[2][0].ToString().Replace(".", "");
+
+            Dictionary<string, string> replacements = new Dictionary<string, string>
+            {
+                {"@total", strTotal},
+                {"@quantity1", quantity1},
+                {"@quantity2", quantity2},
+                {"@unitPrice1", unitPrice1},
+                {"@unitPrice2", unitPrice2},
+                {"@reference1", reference1},
+                {"@reference2", reference2},
+                {"@tAmount1", tAmount1},
+                {"@tAmount2", tAmount2}
+            };
+
+            foreach (var replacement in replacements)
+            {
+                jsonData = jsonData.Replace($"\"{replacement.Key}\"", replacement.Value);
+            }
 
             try
             {
@@ -378,4 +409,4 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
         private readonly IStoreContext _storeContext;
     }
-    }
+}
