@@ -33,14 +33,18 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
         private readonly IShoppingCartService _cart;
         private readonly IWorkContext _workContext;
         private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
+        private readonly KlarnaPaymentSettings _klarnaPaymentSettings;
         public PaymentKlarnaController(ILocalizationService localizationService,
             IPermissionService permissionService,
+            KlarnaPaymentSettings klarnaPaymentSettings,
             ISettingService settingService,
             IStoreContext storeContext,
             IHttpClientFactory httpClientFactory,
             IWorkContext workContext,
             IShoppingCartModelFactory shoppingCartModelFactory,
-            IPaymentService paymentService)
+            IPaymentService paymentService,
+            IShoppingCartService cart
+            )
         {
             this._localizationService = localizationService;
             this._permissionService = permissionService;
@@ -50,6 +54,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             this._paymentService = paymentService;
             _workContext = workContext;
             _shoppingCartModelFactory = shoppingCartModelFactory;
+            _klarnaPaymentSettings = klarnaPaymentSettings;
+            _cart = cart;
 
         }
         public async Task<IActionResult> Configure()
@@ -166,10 +172,9 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             string password = "qSNhaFgn6Ls3bj1P";
 
             var store = await _storeContext.GetCurrentStoreAsync();
-            var storeid = store.Id;
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
-            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart);
+            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
 
 
             // Create JSON data to send in the request
