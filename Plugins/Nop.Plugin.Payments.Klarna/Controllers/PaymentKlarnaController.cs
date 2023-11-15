@@ -175,6 +175,48 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var modelShopping = new ShoppingCartModel();
             var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
+            // what data do I need?
+            // Order amount 
+            //amount of products in the cart - 2
+            var amountOfItems = model.Items.Count();
+            int loopCount = 1;
+            decimal total = 0;
+
+            Dictionary<int, List<decimal>> modelValue = new Dictionary<int, List<decimal>>();
+
+            foreach (var item in model.Items)
+            {
+                // total amount of each product
+                var orderAmount = Decimal.Parse(item.SubTotal.TrimStart('$')); // Parse as decimal
+                var reference = item.ProductId;
+                var quantity = item.Quantity;
+                var unitPrice = Decimal.Parse(item.UnitPrice.TrimStart('$')); // Parse as decimal
+
+                // Check if the key (reference) exists in the dictionary
+                if (!modelValue.ContainsKey(reference))
+                {
+                    // If the key doesn't exist, create a new list and add it to the dictionary
+                    modelValue[reference] = new List<decimal>();
+                }
+
+                // Populating the key with order amount, quantity, and unit price
+                modelValue[reference].Add(orderAmount);
+                modelValue[reference].Add(quantity);
+                modelValue[reference].Add(unitPrice);
+
+                // Accessing the list for a specific product (e.g., ProductId = 1)
+                var product1Values = modelValue[1];
+                var orderAmountP1 = modelValue[1][0];
+
+                // Calculate total amount (by product) using the values in the list
+                var totalAmount = product1Values.Sum(); // Assuming you want to sum up all values in the list
+
+                total = total + modelValue[reference][0];
+                loopCount++;
+            }
+            var total1 = total;
+
+
 
 
             // Create JSON data to send in the request
