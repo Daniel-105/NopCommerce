@@ -194,14 +194,14 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 if (!modelValue.ContainsKey(reference))
                 {
                     // If the key doesn't exist, create a new list and add it to the dictionary
-                    modelValue[reference] = new List<object>();
+                    modelValue[reference] = new List<object> { totalAmount, quantity, unitPrice, productName};
                 }
 
                 // Populating the key with order amount, quantity, unit price, and product name
-                modelValue[reference].Add(totalAmount);
-                modelValue[reference].Add(quantity);
-                modelValue[reference].Add(unitPrice);
-                modelValue[reference].Add(productName);
+                //modelValue[reference].Add(totalAmount);
+                //modelValue[reference].Add(quantity);
+                //modelValue[reference].Add(unitPrice);
+                //modelValue[reference].Add(productName);
 
                 total = total + (decimal)modelValue[reference][0];
             }
