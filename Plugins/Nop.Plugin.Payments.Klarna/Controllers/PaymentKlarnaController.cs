@@ -20,6 +20,11 @@ using Nop.Web.Models.ShoppingCart;
 using Nop.Core.Domain.Orders;
 using Nop.Services.Orders;
 using Nop.Web.Factories;
+using System.Text.Json;
+using DocumentFormat.OpenXml.Office.CustomUI;
+using Microsoft.Extensions.Options;
+using RestSharp;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Nop.Plugin.Payments.Klarna.Controllers
 {
@@ -163,137 +168,116 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
         [HttpPost]
         public async Task<JsonResult> GetClientToken()
         {
-
-            // Replace with your actual API endpoint URL
-            string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
-
-            // Replace with your Basic Authentication credentials
-            string username = "PK131523_f3731dbad121";
-            string password = "qSNhaFgn6Ls3bj1P";
-
-            var store = await _storeContext.GetCurrentStoreAsync();
-            var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
-            var modelShopping = new ShoppingCartModel();
-            var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
-
-            var amountOfItems = model.Items.Count();
-            decimal total = 0;
-
-            Dictionary<int, List<object>> modelValue = new Dictionary<int, List<object>>();
-
-            foreach (var item in model.Items)
-            {
-                // total amount of each product
-                var totalAmount = Decimal.Parse(item.SubTotal.TrimStart('$')); // Parse as decimal
-                var reference = item.ProductId;
-                var quantity = item.Quantity;
-                var unitPrice = Decimal.Parse(item.UnitPrice.TrimStart('$')); // Parse as decimal
-                var productName = item.ProductName;
-
-                // Check if the key (reference) exists in the dictionary
-                if (!modelValue.ContainsKey(reference))
-                {
-                    // If the key doesn't exist, create a new list and add it to the dictionary
-                    modelValue[reference] = new List<object> { totalAmount, quantity, unitPrice, productName};
-                }
-
-                // Populating the key with order amount, quantity, unit price, and product name
-                //modelValue[reference].Add(totalAmount);
-                //modelValue[reference].Add(quantity);
-                //modelValue[reference].Add(unitPrice);
-                //modelValue[reference].Add(productName);
-
-                total = total + (decimal)modelValue[reference][0];
-            }
-
-
-
-
-            // Create JSON data to send in the request
-            string jsonData = @"
-        {
-            ""purchase_country"": ""PT"",
-            ""purchase_currency"": ""EUR"",
-            ""locale"": ""pt-PT"",
-            ""order_amount"": ""@total"",
-            ""order_tax_amount"": 0,
-            ""order_lines"": [
-                {
-                    ""type"": ""physical"",
-                    ""reference"": ""@reference1"",
-                    ""name"": ""@productName1"",
-                    ""quantity"": ""@quantity1"",
-                    ""unit_price"": ""@unitPrice1"",
-                    ""tax_rate"": 0,
-                    ""total_amount"": ""@tAmount1"",
-                    ""total_discount_amount"": 0,
-                    ""total_tax_amount"": 0
-                },
-                {
-                    ""type"": ""physical"",
-                    ""reference"": ""@reference2"",
-                    ""name"": ""@productName2"",
-                    ""quantity"": ""@quantity2"",
-                    ""unit_price"": ""@unitPrice2"",
-                    ""tax_rate"": 0,
-                    ""total_amount"": ""@tAmount2"",
-                    ""total_discount_amount"": 0,
-                    ""total_tax_amount"": 0
-                }
-            ]
-        }";
-            string strTotal = total.ToString().Replace(".", "");
-            string quantity1 = modelValue[1][1].ToString();
-            string quantity2 = modelValue[2][1].ToString();
-
-            // For unitPrice
-            string unitPrice1 = modelValue[1][2].ToString().Replace(".", "");
-            string unitPrice2 = modelValue[2][2].ToString().Replace(".", "");
-
-            string reference1 = modelValue.Keys.FirstOrDefault().ToString();
-            string reference2 = modelValue.Keys.Skip(1).FirstOrDefault().ToString();
-
-            string tAmount1 = modelValue[1][0].ToString().Replace(".", "");
-            string tAmount2 = modelValue[2][0].ToString().Replace(".", "");
-
-            var productName1 = modelValue[1][3];
-            var productName2 = modelValue[2][3];
-
-            Dictionary<string, string> replacements = new Dictionary<string, string>
-            {
-                {"@total", strTotal},
-                {"@quantity1", quantity1},
-                {"@quantity2", quantity2},
-                {"@unitPrice1", unitPrice1},
-                {"@unitPrice2", unitPrice2},
-                {"@reference1", reference1},
-                {"@reference2", reference2},
-                {"@tAmount1", tAmount1},
-                {"@tAmount2", tAmount2},
-                {"@productName1", $"\"{productName1}\""},
-                {"@productName2",  $"\"{productName2}\""}
-            };
-
-            foreach (var replacement in replacements)
-            {
-                jsonData = jsonData.Replace($"\"{replacement.Key}\"", replacement.Value);
-            }
-
             try
             {
-                // Set Basic Authentication credentials
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}")));
+                // Replace with your actual API endpoint URL
+                string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
 
-                // Set the Content-Type header to application/json
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                // Replace with your Basic Authentication credentials
+                string username = "PK131523_f3731dbad121";
+                string password = "qSNhaFgn6Ls3bj1P";
 
-                // Send a POST request with JSON content
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(jsonData, Encoding.UTF8, "application/json"));
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
+                var modelShopping = new ShoppingCartModel();
+                var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
 
-                if (response.IsSuccessStatusCode)
+                var amountOfItems = model.Items.Count();
+
+
+                // Create JSON data to send in the request
+                //string jsonData = @"
+                //{
+                //    ""purchase_country"": ""PT"",
+                //    ""purchase_currency"": ""EUR"",
+                //    ""locale"": ""pt-PT"",
+                //    ""order_amount"": ""@total"",
+                //    ""order_tax_amount"": 0,
+                //    ""order_lines"": [
+                //        {
+                //            ""type"": ""physical"",
+                //            ""reference"": ""@reference1"",
+                //            ""name"": ""@productName1"",
+                //            ""quantity"": ""@quantity1"",
+                //            ""unit_price"": ""@unitPrice1"",
+                //            ""tax_rate"": 0,
+                //            ""total_amount"": ""@tAmount1"",
+                //            ""total_discount_amount"": 0,
+                //            ""total_tax_amount"": 0
+                //        },
+                //        {
+                //            ""type"": ""physical"",
+                //            ""reference"": ""@reference2"",
+                //            ""name"": ""@productName2"",
+                //            ""quantity"": ""@quantity2"",
+                //            ""unit_price"": ""@unitPrice2"",
+                //            ""tax_rate"": 0,
+                //            ""total_amount"": ""@tAmount2"",
+                //            ""total_discount_amount"": 0,
+                //            ""total_tax_amount"": 0
+                //        }
+                //    ]
+                //}";
+
+                var modelCheckout = new KlarnaCheckOutRequestModel();
+
+                modelCheckout.PurchaseCountry = "PT";
+                modelCheckout.PurchaseCurrency = "EUR";
+                modelCheckout.Locale = "pt-PT";
+                modelCheckout.OrderTaxAmount = 0;
+                modelCheckout.OrderAmount = 0;
+
+                var orderLines = new List<OrderLine>();
+
+
+                //decimal total = 0;
+
+                Dictionary<int, List<object>> modelValue = new Dictionary<int, List<object>>();
+
+                foreach (var item in model.Items)
+                {
+                    var order = new OrderLine();
+                    order.Type = "physical";
+                    order.Reference = item.ProductId.ToString();
+                    order.Name = item.ProductName;
+                    order.Quantity = item.Quantity;
+                    order.UnitPrice = Convert.ToDecimal(item.UnitPrice.Replace("$", "").Replace("€", "").Replace(".", ","));
+                    order.TaxRate = 0;
+                    order.TotalAmount = Convert.ToDecimal(item.SubTotal.Replace("$", "").Replace("€", "").Replace(".", ","));
+                    order.TotalDiscountAmount = 0;
+                    order.TotalTaxAmount = 0;
+                    modelCheckout.OrderAmount = modelCheckout.OrderAmount + order.TotalAmount;
+
+                    orderLines.Add(order);
+
+
+                    //total = (decimal)(total + order.TotalAmount);
+
+                }
+
+                modelCheckout.OrderLines = orderLines;
+
+
+                //string strTotal = total.ToString().Replace(".", "");
+                //jsonData = jsonData.Replace("@total", strTotal);
+
+                var jsonDataC = JsonSerializer.Serialize(modelCheckout);
+                var client = new RestClient(apiUrl);
+                var request = new RestRequest("", Method.POST);
+                request.AddHeader("Content-Type", "application/json");
+
+                var basicAuth = System.Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1")
+                               .GetBytes(username + ":" + password));
+
+                request.AddHeader("Authorization", "Basic "+basicAuth);
+
+                request.AddJsonBody(jsonDataC);
+                var response = client.Execute(request);
+
+                if (response.IsSuccessful)
                 {
                     // Read the response body as a string
-                    string responseContent = await response.Content.ReadAsStringAsync();
+                    string responseContent = response.Content.ToString();
                     //JObject json = JObject.Parse(responseContent);
 
                     // Return the JSON data as a JsonResult
