@@ -35,20 +35,25 @@
 <!script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></!script>
 <!script type="text/javascript" src="//x.klarnacdn.net/kp/lib/v1/api.js" async></!script>
 <div>@Model.Items.Count</div>
-@foreach(var item in Model.Items)
+@foreach (var item in Model.Items)
 {
     <div>@item.SubTotal</div>
     <div>@item.Quantity</div>
     <div>@item.ProductName</div>
-@*     <div>@item.Sku</div>
- *@  
- <div>id: @item.ProductId</div>
+    @*     <div>@item.Sku</div>
+ *@
+    <div>id: @item.ProductId</div>
 }
 <script type="text/javascript">
     let klarnaRequest = document.querySelector("#klarnaRequest");
     let authorizationToken = "";
-let jsonDataResponse
-
+    let jsonDataResponse = "";
+    let modelItems = @Html.Raw(Json.Serialize(Model.Items));
+;
+    console.log(modelItems);
+    for (let i = 0; i < modelItems.length; i++) {
+        console.log(modelItems[i].ProductName);
+    }
 
     $(document).ready(function () {
         console.log("You clicked the button");
@@ -86,47 +91,115 @@ let jsonDataResponse
                 function (res) {
                     console.log("Load function called")
                     console.debug(res);
+                    jsonDataResponse = res;
                 });
         };
         klarnaAsyncCallback();
     }
 
+    // console.log(`my response from klarna: ${jsonDataResponse}`);
+
+
+    // {
+    //     purchase_country: "PT",
+    //         purchase_currency: "EUR",
+    //             locale: "pt-PT",
+    //                 order_amount: 20000, //Model.Items.Count
+    //                     order_tax_amount: 0,
+    //                         order_lines: [{
+    //                             type: "physical",
+    //                             reference: "19-402",
+    //                             name: "black T-Shirt", //Model.Items.ProductName
+    //                             quantity: 2, //Model.Items.Quantity
+    //                             unit_price: 5000, //Model.Items.UnitPrice
+    //                             tax_rate: 0,
+    //                             total_amount: 10000, //Model.Items.SubTotal
+    //                             total_discount_amount: 0,
+    //                             total_tax_amount: 0
+    //                         },
+    //                         {
+    //                             type: "physical",
+    //                             reference: "123123",
+    //                             name: "red trousers",
+    //                             quantity: 1,
+    //                             unit_price: 10000,
+    //                             tax_rate: 0,
+    //                             total_amount: 10000,
+    //                             total_discount_amount: 0,
+    //                             total_tax_amount: 0
+    //                         }],
+
+
+
+
+    // /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
+    // The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
+
+    // klarnaRequest.addEventListener("click", () => {
+
+    //     Klarna.Payments.authorize({
+    //         payment_method_category: 'pay_later'
+    //     }, JSON.parse('{ "AcquiringChannel": null, "Attachment": null, "BillingAddress": null, "CustomPaymentMethodIds": null, "Customer": null, "Design": null, "locale": "pt - PT", "MerchantData": null, "MerchantReference1": null, "MerchantReference2": null, "MerchantUrls": null, "Options": null, "order_amount": 3000, "order_lines": [{ "ImageUrl": null, "MerchantData": null, "name": "Ardidas", "ProductIdentifiers": null, "ProductUrl": null, "quantity": 1, "QuantityUnit": null, "reference": "1", "tax_rate": 0, "total_amount": 1000, "total_discount_amount": 0, "total_tax_amount": 0, "Type": "physical", "unit_price": 1000, "Subscription": null }, { "ImageUrl": null, "MerchantData": null, "name": "Nike", "ProductIdentifiers": null, "ProductUrl": null, "quantity": 1, "QuantityUnit": null, "reference": "2", "tax_rate": 0, "total_amount": 2000, "total_discount_amount": 0, "total_tax_amount": 0, "Type": "physical", "unit_price": 2000, "Subscription": null }], "order_tax_amount": 0, "purchase_country": "PT", "purchase_currency": "EUR", "ShippingAddress": null, "Intent": null }'),
+    //         function (res) {
+    //             console.log("Response from the authorize call:");
+    //             console.log(res);
+    //             authorizationToken = res["authorization_token"];
+    //             //authorizationToken = { "authorizationToken": res["authorization_token"] }
+    //             console.log(authorizationToken);
+    //             //let authorizationToken = res["authorization_token"];
+    //             //console.log(`${authorizationToken} is of type ${typeof authorizationToken}`)
+    //             //placeOrderButton.style.display = "block";
+    //             confirm();
+    //         })
+    // });
+
+
     /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
     The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
+    let physical = `{
+        "purchase_country": "PT",
+        "purchase_currency": "EUR",
+        "locale": "pt-PT",
+        "order_amount": 20000,
+        "order_tax_amount": 0,
+        "order_lines": [{
+            "type": "physical",
+            "reference": "19-402",
+            "name": "black T-Shirt",
+            "quantity": 2,
+            "unit_price": 5000,
+            "tax_rate": 0,
+            "total_amount": 10000,
+            "total_discount_amount": 0,
+            "total_tax_amount": 0
+        },
+        {
+            "type": "physical",
+            "reference": "123123",
+            "name": "red trousers",
+            "quantity": 1,
+            "unit_price": 10000,
+            "tax_rate": 0,
+            "total_amount": 10000,
+            "total_discount_amount": 0,
+            "total_tax_amount": 0
+        }]
+    }`;
+
+    // for(let item in modelItems) {
+    //     console
+    // }
+
+    let parsedPhysical = JSON.parse(physical);
+
+    console.log("in json:", parsedPhysical);
+
     klarnaRequest.addEventListener("click", () => {
 
         Klarna.Payments.authorize({
             payment_method_category: 'pay_later'
-        },
-            {
-                purchase_country: "PT",
-                purchase_currency: "EUR",
-                locale: "pt-PT",
-                order_amount: 20000, //Model.Items.Count
-                order_tax_amount: 0,
-                order_lines: [{
-                    type: "physical",
-                    reference: "19-402",
-                    name: "black T-Shirt", //Model.Items.ProductName
-                    quantity: 2, //Model.Items.Quantity
-                    unit_price: 5000, //Model.Items.UnitPrice
-                    tax_rate: 0,
-                    total_amount: 10000, //Model.Items.SubTotal
-                    total_discount_amount: 0,
-                    total_tax_amount: 0
-                },
-                {
-                    type: "physical",
-                    reference: "123123",
-                    name: "red trousers",
-                    quantity: 1,
-                    unit_price: 10000,
-                    tax_rate: 0,
-                    total_amount: 10000,
-                    total_discount_amount: 0,
-                    total_tax_amount: 0
-                }],
-            }, function (res) {
+        }, physical,
+                function (res) {
                 console.log("Response from the authorize call:");
                 console.log(res);
                 authorizationToken = res["authorization_token"];
@@ -135,8 +208,11 @@ let jsonDataResponse
                 //let authorizationToken = res["authorization_token"];
                 //console.log(`${authorizationToken} is of type ${typeof authorizationToken}`)
                 //placeOrderButton.style.display = "block";
-                confirm();
-
+                if (authorizationToken) {
+                    confirm();
+                } else {
+                    alert("Sorry there was a problem with the payment");
+                }
             })
     });
 

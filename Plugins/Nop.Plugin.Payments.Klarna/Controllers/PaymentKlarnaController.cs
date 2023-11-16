@@ -281,7 +281,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     //JObject json = JObject.Parse(responseContent);
 
                     // Return the JSON data as a JsonResult
-                    return Json(responseContent);
+                        return Json(responseContent);
                 }
                 else
                 {
