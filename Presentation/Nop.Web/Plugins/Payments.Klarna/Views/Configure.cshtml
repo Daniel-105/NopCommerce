@@ -12,7 +12,7 @@
             <div class="panel-body">
                 <div style="display:flex; flex-direction:column;">
                     <div style="display:flex;">
-                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;"> 
+                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;">
                         <label for="UsePayground">Use Playground</label>
                     </div>
                     <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
@@ -22,7 +22,7 @@
 
                         <label for="RealPassword">Password</label>
                         <input type="password" id="RealPassword" name="RealPassword" style="width:300px;">
-                    </div>    
+                    </div>
                     <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
                         <h1>Playground Credentials</h1>
                         <label for="paygroundUserName">UserName</label>
@@ -35,7 +35,20 @@
             </div>
         </div>
     </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-input="UserName" asp-store-scope="@Model.UserName" />
+            <nop-label asp-for="UserName" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="UserName" />
+            <span asp-validation-for="UserName"></span>
+        </div>
+    </div>
+    <button>Submit</button>
 </form>
+
+
 <script type="text/javascript">
     let usePlayground = document.querySelector('#usePlayground');
     let playgroundCredentialsDiv = document.querySelector('#playgroundCredentialsDiv');

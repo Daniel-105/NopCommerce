@@ -75,8 +75,12 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             {
                 int activeStoreScopeConfiguration = await this._storeContext.GetActiveStoreScopeConfigurationAsync();
                 KlarnaPaymentSettings klarnaPaymentSettings = await this._settingService.LoadSettingAsync<KlarnaPaymentSettings>(activeStoreScopeConfiguration);
+
+                // Populating the model
                 ConfigurationModel configurationModel = new ConfigurationModel
                 {
+                    // using the klarnaPaymentSettings model and binding it with the AdditionalFee
+                    // of the ConfigurationModel
                     AdditionalFee = klarnaPaymentSettings.AdditionalFee,
                     AdditionalFeePercentage = klarnaPaymentSettings.AdditionalFeePercentage,
                     ActiveStoreScopeConfiguration = activeStoreScopeConfiguration,
@@ -88,7 +92,12 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     ActivateMultibanco = klarnaPaymentSettings.ActivateMultibanco,
                     ActivateSantanderConsumer = klarnaPaymentSettings.ActivateSantanderConsumer,
                     SantanderConsumerMin = klarnaPaymentSettings.SantanderConsumerMin,
-                    SantanderConsumerMax = klarnaPaymentSettings.SantanderConsumerMax
+                    SantanderConsumerMax = klarnaPaymentSettings.SantanderConsumerMax,
+
+                    // for klarna
+                    UserName = klarnaPaymentSettings.UserName,
+                    Password = klarnaPaymentSettings.Password,
+                    KlarnaApiUrl = klarnaPaymentSettings.KlarnaApiUrl
                 };
                 bool flag2 = activeStoreScopeConfiguration > 0;
                 if (flag2)

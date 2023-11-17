@@ -26,5 +26,14 @@ namespace Nop.Plugin.Payments.Klarna
         public bool EnableFeature { get; internal set; }
         public string Name { get; internal set; }
         public string DescriptionText { get; internal set; }
+
+
+
+
+
+        // For Klarna
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string KlarnaApiUrl { get; set; }
     }
 }
