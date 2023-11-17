@@ -49,114 +49,13 @@
     let authorizationToken = "";
     let jsonDataResponse = "";
     let modelItems = @Html.Raw(Json.Serialize(Model.Items));
+    let jsonDataC = "";
+    let jsonStringData = "";
 ;
-    console.log(modelItems);
-    for (let i = 0; i < modelItems.length; i++) {
-        console.log(modelItems[i].ProductName);
-    }
-
-    $(document).ready(function () {
-        console.log("You clicked the button");
-        $.ajax({
-            type: "POST",
-            url: "/GetClientToken",
-            success: function (data) {
-                dataResponse = data;
-                let jsonData = JSON.parse(dataResponse);
-                let client_token = jsonData.client_token;
-                let identifier = jsonData.payment_method_categories[0].identifier;
-                console.log(client_token);
-                console.log(identifier);
-                createSession(client_token, identifier);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error("An error occurred:", errorThrown);
-            }
-        });
-    });
-
-    function createSession(client_token, identifier) {
-        //The following method initializes the Klarna Payments JS library
-        klarnaAsyncCallback = function () {
-            Klarna.Payments.init({
-                client_token: client_token
-            });
-            console.log("Payments initialized");
-            //The following method loads the payment_method_category in the container with the id of 'klarna_container'
-            Klarna.Payments.load({
-                container: '#klarna_container',
-                payment_method_category: identifier
-
-            },
-                function (res) {
-                    console.log("Load function called")
-                    console.debug(res);
-                    jsonDataResponse = res;
-                });
-        };
-        klarnaAsyncCallback();
-    }
-
-    // console.log(`my response from klarna: ${jsonDataResponse}`);
-
-
-    // {
-    //     purchase_country: "PT",
-    //         purchase_currency: "EUR",
-    //             locale: "pt-PT",
-    //                 order_amount: 20000, //Model.Items.Count
-    //                     order_tax_amount: 0,
-    //                         order_lines: [{
-    //                             type: "physical",
-    //                             reference: "19-402",
-    //                             name: "black T-Shirt", //Model.Items.ProductName
-    //                             quantity: 2, //Model.Items.Quantity
-    //                             unit_price: 5000, //Model.Items.UnitPrice
-    //                             tax_rate: 0,
-    //                             total_amount: 10000, //Model.Items.SubTotal
-    //                             total_discount_amount: 0,
-    //                             total_tax_amount: 0
-    //                         },
-    //                         {
-    //                             type: "physical",
-    //                             reference: "123123",
-    //                             name: "red trousers",
-    //                             quantity: 1,
-    //                             unit_price: 10000,
-    //                             tax_rate: 0,
-    //                             total_amount: 10000,
-    //                             total_discount_amount: 0,
-    //                             total_tax_amount: 0
-    //                         }],
-
-
-
-
-    // /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
-    // The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
-
-    // klarnaRequest.addEventListener("click", () => {
-
-    //     Klarna.Payments.authorize({
-    //         payment_method_category: 'pay_later'
-    //     }, JSON.parse('{ "AcquiringChannel": null, "Attachment": null, "BillingAddress": null, "CustomPaymentMethodIds": null, "Customer": null, "Design": null, "locale": "pt - PT", "MerchantData": null, "MerchantReference1": null, "MerchantReference2": null, "MerchantUrls": null, "Options": null, "order_amount": 3000, "order_lines": [{ "ImageUrl": null, "MerchantData": null, "name": "Ardidas", "ProductIdentifiers": null, "ProductUrl": null, "quantity": 1, "QuantityUnit": null, "reference": "1", "tax_rate": 0, "total_amount": 1000, "total_discount_amount": 0, "total_tax_amount": 0, "Type": "physical", "unit_price": 1000, "Subscription": null }, { "ImageUrl": null, "MerchantData": null, "name": "Nike", "ProductIdentifiers": null, "ProductUrl": null, "quantity": 1, "QuantityUnit": null, "reference": "2", "tax_rate": 0, "total_amount": 2000, "total_discount_amount": 0, "total_tax_amount": 0, "Type": "physical", "unit_price": 2000, "Subscription": null }], "order_tax_amount": 0, "purchase_country": "PT", "purchase_currency": "EUR", "ShippingAddress": null, "Intent": null }'),
-    //         function (res) {
-    //             console.log("Response from the authorize call:");
-    //             console.log(res);
-    //             authorizationToken = res["authorization_token"];
-    //             //authorizationToken = { "authorizationToken": res["authorization_token"] }
-    //             console.log(authorizationToken);
-    //             //let authorizationToken = res["authorization_token"];
-    //             //console.log(`${authorizationToken} is of type ${typeof authorizationToken}`)
-    //             //placeOrderButton.style.display = "block";
-    //             confirm();
-    //         })
-    // });
-
 
     /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
     The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
-    let physical = `{
+    let jsonRequest = `{
         "purchase_country": "PT",
         "purchase_currency": "EUR",
         "locale": "pt-PT",
@@ -186,19 +85,67 @@
         }]
     }`;
 
-    // for(let item in modelItems) {
-    //     console
+    // console.log(modelItems);
+    // for (let i = 0; i < modelItems.length; i++) {
+    //     console.log(modelItems[i].ProductName);
     // }
 
-    let parsedPhysical = JSON.parse(physical);
+    $(document).ready(function () {
+        console.log("You clicked the button");
+        $.ajax({
+            type: "POST",
+            url: "/GetClientToken",
+            success: function (data) {
+                dataResponse = JSON.parse(data.ResponseContent);
+                jsonDataC = JSON.parse(data.jsonData);
+                jsonStringData = data.jsonData;
+                let client_token = dataResponse.client_token;
+                let identifier = dataResponse.payment_method_categories[0].identifier;
+                console.log(dataResponse);
+                console.log(jsonDataC);
+                console.log(client_token);
+                console.log(identifier);
+                // console.log(jsonDataResponse);
+                createSession(client_token, identifier);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("An error occurred:", errorThrown);
+            }
+        });
+    });
 
-    console.log("in json:", parsedPhysical);
+
+    function createSession(client_token, identifier) {
+        //The following method initializes the Klarna Payments JS library
+        klarnaAsyncCallback = function () {
+            Klarna.Payments.init({
+                client_token: client_token
+            });
+            console.log("Payments initialized");
+            //The following method loads the payment_method_category in the container with the id of 'klarna_container'
+            Klarna.Payments.load({
+                container: '#klarna_container',
+                payment_method_category: identifier
+
+            },
+                function (res) {
+                    console.log("Load function called")
+                    console.debug(res);
+                    jsonDataResponse = res;
+                });
+        };
+        klarnaAsyncCallback();
+    }
+
+
+    console.log(`jsonData: ${jsonDataC}`);
+
 
     klarnaRequest.addEventListener("click", () => {
 
         Klarna.Payments.authorize({
             payment_method_category: 'pay_later'
-        }, physical,
+        }, jsonStringData,
                 function (res) {
                 console.log("Response from the authorize call:");
                 console.log(res);

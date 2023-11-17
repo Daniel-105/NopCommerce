@@ -184,41 +184,6 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
                 var amountOfItems = model.Items.Count();
 
-
-                // Create JSON data to send in the request
-                //string jsonData = @"
-                //{
-                //    ""purchase_country"": ""PT"",
-                //    ""purchase_currency"": ""EUR"",
-                //    ""locale"": ""pt-PT"",
-                //    ""order_amount"": ""@total"",
-                //    ""order_tax_amount"": 0,
-                //    ""order_lines"": [
-                //        {
-                //            ""type"": ""physical"",
-                //            ""reference"": ""@reference1"",
-                //            ""name"": ""@productName1"",
-                //            ""quantity"": ""@quantity1"",
-                //            ""unit_price"": ""@unitPrice1"",
-                //            ""tax_rate"": 0,
-                //            ""total_amount"": ""@tAmount1"",
-                //            ""total_discount_amount"": 0,
-                //            ""total_tax_amount"": 0
-                //        },
-                //        {
-                //            ""type"": ""physical"",
-                //            ""reference"": ""@reference2"",
-                //            ""name"": ""@productName2"",
-                //            ""quantity"": ""@quantity2"",
-                //            ""unit_price"": ""@unitPrice2"",
-                //            ""tax_rate"": 0,
-                //            ""total_amount"": ""@tAmount2"",
-                //            ""total_discount_amount"": 0,
-                //            ""total_tax_amount"": 0
-                //        }
-                //    ]
-                //}";
-
                 var modelCheckout = new KlarnaCheckOutRequestModel();
 
                 modelCheckout.PurchaseCountry = "PT";
@@ -228,9 +193,6 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 modelCheckout.OrderAmount = 0;
 
                 var orderLines = new List<OrderLine>();
-
-
-                //decimal total = 0;
 
                 Dictionary<int, List<object>> modelValue = new Dictionary<int, List<object>>();
 
@@ -249,17 +211,10 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     modelCheckout.OrderAmount = modelCheckout.OrderAmount + order.TotalAmount;
 
                     orderLines.Add(order);
-
-
-                    //total = (decimal)(total + order.TotalAmount);
-
                 }
 
                 modelCheckout.OrderLines = orderLines;
 
-
-                //string strTotal = total.ToString().Replace(".", "");
-                //jsonData = jsonData.Replace("@total", strTotal);
 
                 var jsonDataC = JsonSerializer.Serialize(modelCheckout);
                 var client = new RestClient(apiUrl);
@@ -269,7 +224,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 var basicAuth = System.Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1")
                                .GetBytes(username + ":" + password));
 
-                request.AddHeader("Authorization", "Basic "+basicAuth);
+                request.AddHeader("Authorization", "Basic " + basicAuth);
 
                 request.AddJsonBody(jsonDataC);
                 var response = client.Execute(request);
@@ -278,10 +233,14 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 {
                     // Read the response body as a string
                     string responseContent = response.Content.ToString();
-                    //JObject json = JObject.Parse(responseContent);
 
-                    // Return the JSON data as a JsonResult
-                        return Json(responseContent);
+                    //JObject json = JObject.Parse(responseContent);
+                    var klarnaRequestDataVM = new KlarnaRequestDataVM
+                    {
+                        ResponseContent = responseContent,
+                        jsonData = jsonDataC
+                    };
+                    return Json(klarnaRequestDataVM);
                 }
                 else
                 {
@@ -300,78 +259,76 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
         [HttpPost]
         public async Task<IActionResult> PlaceOrder(string authorizationToken)
         {
-            // Replace with your actual API endpoint URL
-            string apiUrl = "https://api.playground.klarna.com/payments/v1/authorizations/" + authorizationToken + "/order";
-
-            // Replace with your Basic Authentication credentials
-            string username = "PK131523_f3731dbad121";
-            string password = "qSNhaFgn6Ls3bj1P";
-
-            // Create JSON data to send in the request
-            string jsonData = @"
-        {
-            ""purchase_country"": ""PT"",
-            ""purchase_currency"": ""EUR"",
-            ""locale"": ""pt-PT"",
-            ""order_amount"": 20000,
-            ""order_tax_amount"": 0,
-            ""order_lines"": [
-                {
-                    ""type"": ""physical"",
-                    ""reference"": ""19-402"",
-                    ""name"": ""black T-Shirt"",
-                    ""quantity"": 2,
-                    ""unit_price"": 5000,
-                    ""tax_rate"": 0,
-                    ""total_amount"": 10000,
-                    ""total_discount_amount"": 0,
-                    ""total_tax_amount"": 0
-                },
-                {
-                    ""type"": ""physical"",
-                    ""reference"": ""123123"",
-                    ""name"": ""red trousers"",
-                    ""quantity"": 1,
-                    ""unit_price"": 10000,
-                    ""tax_rate"": 0,
-                    ""total_amount"": 10000,
-                    ""total_discount_amount"": 0,
-                    ""total_tax_amount"": 0
-                }
-            ]
-        }";
-
             try
             {
-                // Set Basic Authentication credentials
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}")));
 
-                // Set the Content-Type header to application/json
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                // Replace with your actual API endpoint URL
+                string apiUrl = "https://api.playground.klarna.com/payments/v1/authorizations/" + authorizationToken + "/order";
 
-                // Send a POST request with JSON content
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(jsonData, Encoding.UTF8, "application/json"));
+                // Replace with your Basic Authentication credentials
+                string username = "PK131523_f3731dbad121";
+                string password = "qSNhaFgn6Ls3bj1P";
 
-                if (response.IsSuccessStatusCode)
+
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var cart = await _cart.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
+                var modelShopping = new ShoppingCartModel();
+                var model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(modelShopping, cart, false);
+
+                var modelCheckout = new KlarnaCheckOutRequestModel();
+
+                modelCheckout.PurchaseCountry = "PT";
+                modelCheckout.PurchaseCurrency = "EUR";
+                modelCheckout.Locale = "pt-PT";
+                modelCheckout.OrderTaxAmount = 0;
+                modelCheckout.OrderAmount = 0;
+
+                var orderLines = new List<OrderLine>();
+
+                Dictionary<int, List<object>> modelValue = new Dictionary<int, List<object>>();
+
+                foreach (var item in model.Items)
+                {
+                    var order = new OrderLine();
+                    order.Type = "physical";
+                    order.Reference = item.ProductId.ToString();
+                    order.Name = item.ProductName;
+                    order.Quantity = item.Quantity;
+                    order.UnitPrice = Convert.ToDecimal(item.UnitPrice.Replace("$", "").Replace("€", "").Replace(".", ","));
+                    order.TaxRate = 0;
+                    order.TotalAmount = Convert.ToDecimal(item.SubTotal.Replace("$", "").Replace("€", "").Replace(".", ","));
+                    order.TotalDiscountAmount = 0;
+                    order.TotalTaxAmount = 0;
+                    modelCheckout.OrderAmount = modelCheckout.OrderAmount + order.TotalAmount;
+
+                    orderLines.Add(order);
+                }
+
+                modelCheckout.OrderLines = orderLines;
+
+
+                var jsonDataC = JsonSerializer.Serialize(modelCheckout);
+                var client = new RestClient(apiUrl);
+                var request = new RestRequest("", Method.POST);
+                request.AddHeader("Content-Type", "application/json");
+
+                var basicAuth = System.Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1")
+                               .GetBytes(username + ":" + password));
+
+                request.AddHeader("Authorization", "Basic " + basicAuth);
+
+                request.AddJsonBody(jsonDataC);
+                var response = client.Execute(request);
+
+                if (response.IsSuccessful)
                 {
                     // Read the response body as a string
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    JObject json = JObject.Parse(responseContent);
-
-                    var typeJson = json.GetType();
-                    //var jsonResponse = JsonSerializer.Deserialize<JsonObject>(responseContent);
-
-                    // Return the JSON data as a JsonResult
-                    //return Json(responseContent);
-                    //return RedirectToAction("ProcessPaymentAsync", "PaymentKlarna");
-
-                    //I'm changing this variable.
-                    //trying to find why don't I have access to ProcessPaymentRequest
-
-
+                    string responseContent = response.Content.ToString();
                     //TODO criar variavel de sessão HttpContext.Session.Get<ProcessPaymentRequest>("OrderPaymentInfo"); e popular com os dados
                     HttpContext.Session.Set<ProcessPaymentRequest>("OrderPaymentInfo", new ProcessPaymentRequest());
 
+
+                    //JObject json = JObject.Parse(responseContent);
                     return Json(responseContent);
                 }
                 else
@@ -384,7 +341,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
             catch (Exception ex)
             {
-                return Json(new { error = "An error occurred: " + ex.Message });
+                //return Json(new { error = "An error occurred: " + ex.Message });
+                return null;
             }
         }
         private readonly ILocalizationService _localizationService;
