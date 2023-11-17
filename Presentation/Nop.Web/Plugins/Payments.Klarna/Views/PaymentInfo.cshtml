@@ -45,45 +45,56 @@
     <div>id: @item.ProductId</div>
 }
 <script type="text/javascript">
+
     let klarnaRequest = document.querySelector("#klarnaRequest");
     let authorizationToken = "";
     let jsonDataResponse = "";
     let modelItems = @Html.Raw(Json.Serialize(Model.Items));
     let jsonDataC = "";
     let jsonStringData = "";
-;
+
+    $(document).ready(function () {
+        $('.payment-info-next-step-button').hide();
+    });
+
+    $(document).on('accordion_section_opened', function (data) {
+        if (data.currentSectionId != 'opc-payment_info') {
+            $('.payment-info-next-step-button').show();
+        }
+    });
+
 
     /*The following is the authorize function, which triggers Klarna to perform a risk assessment of the purchase
     The successful response of this risk assessment is an authorization token, which in this example is logged in the console*/
-    let jsonRequest = `{
-        "purchase_country": "PT",
-        "purchase_currency": "EUR",
-        "locale": "pt-PT",
-        "order_amount": 20000,
-        "order_tax_amount": 0,
-        "order_lines": [{
-            "type": "physical",
-            "reference": "19-402",
-            "name": "black T-Shirt",
-            "quantity": 2,
-            "unit_price": 5000,
-            "tax_rate": 0,
-            "total_amount": 10000,
-            "total_discount_amount": 0,
-            "total_tax_amount": 0
-        },
-        {
-            "type": "physical",
-            "reference": "123123",
-            "name": "red trousers",
-            "quantity": 1,
-            "unit_price": 10000,
-            "tax_rate": 0,
-            "total_amount": 10000,
-            "total_discount_amount": 0,
-            "total_tax_amount": 0
-        }]
-    }`;
+    // let jsonRequest = `{
+    //     "purchase_country": "PT",
+    //     "purchase_currency": "EUR",
+    //     "locale": "pt-PT",
+    //     "order_amount": 20000,
+    //     "order_tax_amount": 0,
+    //     "order_lines": [{
+    //         "type": "physical",
+    //         "reference": "19-402",
+    //         "name": "black T-Shirt",
+    //         "quantity": 2,
+    //         "unit_price": 5000,
+    //         "tax_rate": 0,
+    //         "total_amount": 10000,
+    //         "total_discount_amount": 0,
+    //         "total_tax_amount": 0
+    //     },
+    //     {
+    //         "type": "physical",
+    //         "reference": "123123",
+    //         "name": "red trousers",
+    //         "quantity": 1,
+    //         "unit_price": 10000,
+    //         "tax_rate": 0,
+    //         "total_amount": 10000,
+    //         "total_discount_amount": 0,
+    //         "total_tax_amount": 0
+    //     }]
+    // }`;
 
     // console.log(modelItems);
     // for (let i = 0; i < modelItems.length; i++) {
@@ -159,6 +170,7 @@
                     confirm();
                 } else {
                     alert("Sorry there was a problem with the payment");
+                    window.location = "/";
                 }
             })
     });
@@ -215,7 +227,7 @@
             },
             url: url,
             success: function (response) {
-                alert("sucess");
+                // alert("sucess");
                 window.location.href = "/checkout/completed";
             }
         })
