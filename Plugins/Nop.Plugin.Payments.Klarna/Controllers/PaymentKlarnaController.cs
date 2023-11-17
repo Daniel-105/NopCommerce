@@ -324,6 +324,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 {
                     // Read the response body as a string
                     string responseContent = response.Content.ToString();
+
                     //TODO criar variavel de sessão HttpContext.Session.Get<ProcessPaymentRequest>("OrderPaymentInfo"); e popular com os dados
                     HttpContext.Session.Set<ProcessPaymentRequest>("OrderPaymentInfo", new ProcessPaymentRequest());
 
