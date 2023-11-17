@@ -1,11 +1,14 @@
-﻿@model Nop.Web.Models.ShoppingCart.ShoppingCartModel
-@*@inject Nop.Core.Domain.Orders.OrderSettings orderSettings
-    @inject Nop.Plugin.Payments.Qualpay.QualpaySettings qualpaySettings*@
+﻿@using Nop.Web.Framework.UI;
+@model Nop.Web.Models.ShoppingCart.ShoppingCartModel
 
 @{
     Layout = "";
     //Html.AddScriptParts(ResourceLocation.Footer, Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsScriptPath, excludeFromBundle: true);
     //Html.AddCssFileParts(Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsStylePath, excludeFromBundle: true);
+
+    @inject INopHtmlHelper NopHtml
+
+    NopHtml.AppendPageCssClassParts("html-shopping-cart-page");
 }
 
 <style>
@@ -32,18 +35,111 @@
     <div id="klarnaRequest" class="klarnaBtn">Klarna Payment</div>
 </div>
 
+<table class="cart">
+    <colgroup>
+        <col width="1">
+        <col width="1">
+        <col>
+        <col width="1">
+        <col width="1">
+        <col width="1">
+    </colgroup>
+    <thead style="display: flex;">
+        <tr style="font-size: inherit;">
+            <th class="sku">
+                SKU
+            </th>
+            <th class="product-picture">
+                Image
+            </th>
+            <th class="product">
+                Product(s)
+            </th>
+            <th class="unit-price">
+                Price
+            </th>
+            <th class="quantity">
+                Qty.
+            </th>
+            <th class="subtotal">
+                Total
+            </th>
+        </tr>
+    </thead>
+    <tbody style="border:1px solid black;">
+        @foreach (var item in Model.Items)
+        {
+            <tr style="display:flex;">
+
+                <td class="sku" style="border-style:none;">
+                    <label class="td-title">SKU:</label>
+                    <span class="sku-number">@item.ProductId</span>
+                </td>
+                <td style="border-style:none;" class="product-picture">
+                    <img alt="Picture of Ardidas" src="@item.Picture.ImageUrl" title="Show details for Ardidas">
+                </td>
+                <td  style="border-style:none;"class="product">
+                    <a href="/ardidas" class="product-name">Ardidas</a>
+                </td>
+                <td style="border-style:none;" class="unit-price">
+                    <label class="td-title">Price:</label>
+                    <span class="product-unit-price">$10.00</span>
+                </td>
+                <td  style="border-style:none;" class="quantity">
+                    <label class="td-title" for="itemquantity52">Qty.:</label>
+                    <span class="product-quantity">1</span>
+                </td>
+                <td style="border-style:none;" class="subtotal">
+                    <label class="td-title">Total:</label>
+                    <span class="product-subtotal">$10.00</span>
+                </td>
+            </tr>
+
+
+        }
+        <tr>
+            <td style="display:;" class="sku">
+                <label class="td-title">SKU:</label>
+                <span class="sku-number"></span>
+            </td>
+            <td style="display:;" class="product-picture">
+                <a href="/nike"><img alt="Picture of Nike" src="https://localhost:5001/images/thumbs/0000004_nike_80.jpeg" title="Show details for Nike"></a>
+            </td>
+            <td style="display:;" class="product">
+                <a href="/nike" class="product-name">Nike</a>
+            </td>
+            <td style="display:;" class="unit-price">
+                <label class="td-title">Price:</label>
+                <span class="product-unit-price">$20.00</span>
+            </td>
+            <td style="display:;" class="quantity">
+                <label class="td-title" for="itemquantity53">Qty.:</label>
+                <span class="product-quantity">1</span>
+            </td>
+            <td style="display:;" class="subtotal">
+                <label class="td-title">Total:</label>
+                <span class="product-subtotal">$20.00</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
 <!script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></!script>
 <!script type="text/javascript" src="//x.klarnacdn.net/kp/lib/v1/api.js" async></!script>
-<div>@Model.Items.Count</div>
+
+@*<div>@Model.Items.Count</div>
 @foreach (var item in Model.Items)
 {
     <div>@item.SubTotal</div>
     <div>@item.Quantity</div>
     <div>@item.ProductName</div>
-    @*     <div>@item.Sku</div>
- *@
+         <div>@item.Sku</div>
+
     <div>id: @item.ProductId</div>
 }
+*@
 <script type="text/javascript">
 
     let klarnaRequest = document.querySelector("#klarnaRequest");
@@ -157,7 +253,7 @@
         Klarna.Payments.authorize({
             payment_method_category: 'pay_later'
         }, jsonStringData,
-                function (res) {
+            function (res) {
                 console.log("Response from the authorize call:");
                 console.log(res);
                 authorizationToken = res["authorization_token"];
