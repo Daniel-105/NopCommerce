@@ -18,6 +18,7 @@ namespace Nop.Services.Configuration
     /// </summary>
     public partial class SettingService : ISettingService
     {
+
         #region Fields
 
         private readonly IRepository<Setting> _settingRepository;

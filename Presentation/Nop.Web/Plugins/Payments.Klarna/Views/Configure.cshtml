@@ -12,40 +12,54 @@
             <div class="panel-body">
                 <div style="display:flex; flex-direction:column;">
                     <div style="display:flex;">
+                        @* TODO: create a property in the ConfigurationModel  *@
                         <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;">
                         <label for="UsePayground">Use Playground</label>
                     </div>
                     <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
                         <h1>Klarna Payment Credentials</h1>
-                        <label for="RealUserName">UserName</label>
-                        <input type="text" id="RealUserName" name="RealUserName" style="width:300px;">
 
-                        <label for="RealPassword">Password</label>
+
+
+                        <div class="col-md-9">
+                            <label for="paygroundUserName">UserName</label>
+                            <nop-editor asp-for="UserName" />
+                            <span asp-validation-for="UserName"></span>
+                        </div>
+
+
+                        <div class="col-md-9">
+                            <label for="paygroundPassword">Password</label>
+                            <nop-editor asp-for="Password" />
+                            <span asp-validation-for="Password"></span>
+                        </div>
+
+
+                        <div class="col-md-9">
+                            <label for="paygroundURL">API URL</label>
+                            <nop-editor asp-for="KlarnaApiUrl" />
+                            <span asp-validation-for="KlarnaApiUrl"></span>
+                        </div>
+
+
+
+                        @*                         <label for="RealPassword">Password</label>
                         <input type="password" id="RealPassword" name="RealPassword" style="width:300px;">
-                    </div>
-                    <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
+                        </div>
+                        <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
                         <h1>Playground Credentials</h1>
                         <label for="paygroundUserName">UserName</label>
                         <input type="text" id="paygroundUserName" name="paygroundUserName" style="width:300px;">
 
                         <label for="paygroundPassword">Password</label>
                         <input type="password" id="paygroundPassword" name="paygroundPassword" style="width:300px;">
+                        </div>
+                        *@
                     </div>
                 </div>
             </div>
+            <button>Submit</button>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-3">
-            <nop-override-store-checkbox asp-input="UserName" asp-store-scope="@Model.UserName" />
-            <nop-label asp-for="UserName" />
-        </div>
-        <div class="col-md-9">
-            <nop-editor asp-for="UserName" />
-            <span asp-validation-for="UserName"></span>
-        </div>
-    </div>
-    <button>Submit</button>
 </form>
 
 
