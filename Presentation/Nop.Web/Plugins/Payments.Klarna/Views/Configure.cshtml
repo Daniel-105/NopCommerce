@@ -6,6 +6,70 @@
 
 @await Component.InvokeAsync("StoreScopeConfiguration")
 
+
+<style>
+
+
+    button {
+        margin: 20px;
+        margin-left:0px;
+    }
+
+    .custom-btn {
+        width: 130px;
+        height: 40px;
+        color: #fff;
+        border-radius: 5px;
+        padding: 10px 25px;
+        font-family: 'Lato', sans-serif;
+        font-weight: 500;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        display: inline-block;
+        box-shadow: inset 2px 2px 2px 0px rgba(255,255,255,.5), 7px 7px 20px 0px rgba(0,0,0,.1), 4px 4px 5px 0px rgba(0,0,0,.1);
+        outline: none;
+    }
+
+    /* 16 */
+    .btn-16 {
+        border: none;
+        color: #000;
+    }
+
+        .btn-16:after {
+            position: absolute;
+            content: "";
+            width: 0;
+            height: 100%;
+            top: 0;
+            left: 0;
+            direction: rtl;
+            z-index: -1;
+            box-shadow: -7px -7px 20px 0px #fff9, -4px -4px 5px 0px #fff9, 7px 7px 20px 0px #0002, 4px 4px 5px 0px #0001;
+            transition: all 0.3s ease;
+        }
+
+        .btn-16:hover {
+            color: #000;
+        }
+
+            .btn-16:hover:after {
+                left: auto;
+                right: 0;
+                width: 100%;
+            }
+
+        .btn-16:active {
+            top: 2px;
+        }
+
+        .ml {
+            margin-left:10px;
+        }
+</style>
+
 <form asp-controller="PaymentKlarna" asp-action="Configure" method="post">
     <div class="panel-group">
         <div class="panel panel-default">
@@ -13,54 +77,64 @@
                 <div style="display:flex; flex-direction:column;">
                     <div style="display:flex;">
                         @* TODO: create a property in the ConfigurationModel  *@
-                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;">
-                        <label for="UsePayground">Use Playground</label>
+                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;" asp-for="Playground_OverrideForStore" asp-input="UsePlayground"/>
+                        @* <nop-override-store-checkbox asp-for="Playground_OverrideForStore" asp-input="UsePlayground"  /> *@
+                        <label for="usePlayground">Use Playground</label>
+                        @* <nop-override-store-checkbox asp-for="UsePlayground" asp-input="UsePlayground" asp-store-scope="@Model.UsePlayground" /> *@
                     </div>
+
+                        @if(Model.UsePlayground == true)
+                        {
+                            <div>(Currently using playground)</div>
+                        }
+                        else
+                        {
+                            <div>(Currently using Real Api)</div>
+                        }
                     <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
                         <h1>Klarna Payment Credentials</h1>
-                        <h1>@Model.UserName</h1>
 
                         <div class="form-group">
-                            <div class="col-md-3"> 
-@*                                 <nop-override-store-checkbox asp-for="UserName_OverrideForStore" asp-input="UserName"  />
- *@                                <nop-label asp-for="UserName" />
-                            </div>
-                            <div class="col-md-3">
+                            <div>
+                                <label for="paygroundUserName">UserName</label>
                                 <nop-editor asp-for="UserName" />
                                 <span asp-validation-for="UserName"></span>
                             </div>
                         </div>
-
-
-                        <div class="col-md-9">
+                        <div>
                             <label for="paygroundPassword">Password</label>
                             <nop-editor asp-for="Password" />
                             <span asp-validation-for="Password"></span>
                         </div>
-
-
-                        <div class="col-md-9">
+                        <div>
                             <label for="paygroundURL">API URL</label>
                             <nop-editor asp-for="KlarnaApiUrl" />
                             <span asp-validation-for="KlarnaApiUrl"></span>
                         </div>
-
-                        <button>Submit</button>
-
-
-                        @*                         <label for="RealPassword">Password</label>
-                        <input type="password" id="RealPassword" name="RealPassword" style="width:300px;">
-                        </div>
-                        <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
-                        <h1>Playground Credentials</h1>
-                        <label for="paygroundUserName">UserName</label>
-                        <input type="text" id="paygroundUserName" name="paygroundUserName" style="width:300px;">
-
-                        <label for="paygroundPassword">Password</label>
-                        <input type="password" id="paygroundPassword" name="paygroundPassword" style="width:300px;">
-                        </div>
-                        *@
                     </div>
+                    <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
+                        <h1>Playground Klarna Payment Credentials</h1>
+
+                        <div class="form-group">
+                            <div>
+                                <label for="paygroundUserName">Payground UserName</label>
+                                <nop-editor asp-for="PlaygroundUserName" />
+                                <span asp-validation-for="PlaygroundUserName"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="paygroundPassword">Payground Password</label>
+                            <nop-editor asp-for="PaygroundPassword" />
+                            <span asp-validation-for="PaygroundPassword"></span>
+                        </div>
+                        <div>
+                            <label for="paygroundURL">Payground API URL</label>
+                            <nop-editor asp-for="playgroundKlarnaApiUrl" />
+                            <span asp-validation-for="playgroundKlarnaApiUrl"></span>
+                        </div>
+                    </div>
+                    <button class="custom-btn btn-16">Submit</button>
+
                 </div>
             </div>
         </div>

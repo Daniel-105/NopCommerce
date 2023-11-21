@@ -107,10 +107,20 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     SantanderConsumerMin = klarnaPaymentSettings.SantanderConsumerMin,
                     SantanderConsumerMax = klarnaPaymentSettings.SantanderConsumerMax,
 
+
+
+                    UsePlayground = klarnaPaymentSettings.UsePlayground,
+
                     // for klarna
                     UserName = klarnaPaymentSettings.UserName,
                     Password = klarnaPaymentSettings.Password,
-                    KlarnaApiUrl = klarnaPaymentSettings.KlarnaApiUrl
+                    KlarnaApiUrl = klarnaPaymentSettings.KlarnaApiUrl,
+
+                    //For Klarna Playground
+                    PlaygroundUserName = klarnaPaymentSettings.PlaygroundUserName,
+                    PaygroundPassword = klarnaPaymentSettings.PaygroundPassword,
+                    playgroundKlarnaApiUrl = klarnaPaymentSettings.playgroundKlarnaApiUrl
+
                 };
                 bool flag2 = activeStoreScopeConfiguration > 0;
                 if (flag2)
@@ -128,12 +138,19 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     configurationModel.SantanderConsumerMax_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMax, activeStoreScopeConfiguration);
 
 
+
+                    configurationModel.Playground_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UsePlayground, activeStoreScopeConfiguration);
+
+
                     // For Klarna
                     configurationModel.KlarnaApiUrl_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.KlarnaApiUrl, activeStoreScopeConfiguration);
                     configurationModel.UserName_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UserName, activeStoreScopeConfiguration);
                     configurationModel.Password_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.Password, activeStoreScopeConfiguration);
 
-
+                    // For Klarna playground
+                    configurationModel.PlaygroundKlarnaApiUrl_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.playgroundKlarnaApiUrl, activeStoreScopeConfiguration);
+                    configurationModel.PlaygroundUserName_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.PlaygroundUserName, activeStoreScopeConfiguration);
+                    configurationModel.PlaygroundPassword_OverrideForStore = await this._settingService.SettingExistsAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.PaygroundPassword, activeStoreScopeConfiguration);
 
                     ////For Klarna
                     //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.KlarnaApiUrl, model.KlarnaApiUrl_OverrideForStore, activeStoreScopeConfiguration, false );
@@ -186,11 +203,18 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     //klarnaPaymentSettings.SantanderConsumerMax = model.SantanderConsumerMax;
 
 
-                    // for klarna
+                    klarnaPaymentSettings.UsePlayground= model.UsePlayground;
 
+                    // for klarna
                     klarnaPaymentSettings.UserName = model.UserName;
                     klarnaPaymentSettings.Password = model.Password;
                     klarnaPaymentSettings.KlarnaApiUrl = model.KlarnaApiUrl;
+
+                    //For Klarna Playground
+                    klarnaPaymentSettings.PlaygroundUserName = model.PlaygroundUserName;
+                    klarnaPaymentSettings.PaygroundPassword = model.PaygroundPassword;
+                    klarnaPaymentSettings.playgroundKlarnaApiUrl = model.playgroundKlarnaApiUrl;
+
 
 
                     //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, decimal>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AdditionalFee, model.AdditionalFee_OverrideForStore, activeStoreScopeConfiguration, false);
@@ -206,10 +230,19 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                     //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMax, model.SantanderConsumerMax_OverrideForStore, activeStoreScopeConfiguration, false)null;
 
 
+
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UsePlayground, model.Playground_OverrideForStore, activeStoreScopeConfiguration, false);
+
                     //For Klarna
                     await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.KlarnaApiUrl, model.KlarnaApiUrl_OverrideForStore, activeStoreScopeConfiguration, false);
                     await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UserName, model.UserName_OverrideForStore, activeStoreScopeConfiguration, false);
                     await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.Password, model.Password_OverrideForStore, activeStoreScopeConfiguration, false);
+
+
+                    //For Klarna
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.playgroundKlarnaApiUrl, model.PlaygroundKlarnaApiUrl_OverrideForStore, activeStoreScopeConfiguration, false);
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.PlaygroundUserName, model.PlaygroundUserName_OverrideForStore, activeStoreScopeConfiguration, false);
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.PaygroundPassword, model.PlaygroundPassword_OverrideForStore, activeStoreScopeConfiguration, false);
 
                     await this._settingService.ClearCacheAsync();
 
@@ -233,21 +266,43 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
         {
             try
             {
-                //// Replace with your actual API endpoint URL
-                string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
-
-                //// Replace with your Basic Authentication credentials
-                string username = "PK131523_f3731dbad121";
-                string password = "qSNhaFgn6Ls3bj1P";
-
+                // Initializing the variables
+                string apiUrl;
+                string username;
+                string password;
 
                 int activeStoreScopeConfiguration = await this._storeContext.GetActiveStoreScopeConfigurationAsync();
                 KlarnaPaymentSettings klarnaPaymentSettings = await this._settingService.LoadSettingAsync<KlarnaPaymentSettings>(activeStoreScopeConfiguration);
 
-                var a = klarnaPaymentSettings.KlarnaApiUrl;
 
-                //var klarna = _configurationModel.KlarnaApiUrl;
-                //var klarna2 = configurationModel.KlarnaApiUrl;
+                // For the playground
+                if (klarnaPaymentSettings.UsePlayground == true)
+                {
+                    //// Replace with your Basic Authentication credentials
+                    //string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
+                    apiUrl = klarnaPaymentSettings.playgroundKlarnaApiUrl;
+
+                    //string username = "PK131523_f3731dbad121";
+                    username = klarnaPaymentSettings.PlaygroundUserName;
+
+                    //string password = "qSNhaFgn6Ls3bj1P";
+                    password = klarnaPaymentSettings.PaygroundPassword;
+                }
+                else
+                {
+                    // Replace with your Basic Authentication credentials
+
+                    //string apiUrl = "https://api.playground.klarna.com/payments/v1/sessions";
+                    apiUrl = klarnaPaymentSettings.KlarnaApiUrl;
+
+                    //string username = "PK131523_f3731dbad121";
+                    username = klarnaPaymentSettings.UserName;
+
+
+                    //string password = "qSNhaFgn6Ls3bj1P";
+                    password = klarnaPaymentSettings.Password;
+
+                }
 
 
                 var store = await _storeContext.GetCurrentStoreAsync();

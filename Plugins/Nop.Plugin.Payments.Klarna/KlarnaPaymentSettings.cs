@@ -35,5 +35,12 @@ namespace Nop.Plugin.Payments.Klarna
         public string UserName { get; set; }
         public string Password { get; set; }
         public string KlarnaApiUrl { get; set; }
+
+
+        public string PlaygroundUserName { get; set; }
+        public string PaygroundPassword { get; set; }
+        public string playgroundKlarnaApiUrl { get; set; }
+
+        public bool UsePlayground { get; set; }
     }
 }
