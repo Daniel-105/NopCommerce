@@ -66,11 +66,10 @@ namespace Nop.Plugin.Payments.Klarna.Models
 
 
 
-        // For Klarna
+        // For Klarna Real Api
         [NopResourceDisplayName("Plugins.Payments.Klarna.Fields.UserName")]
         public string? UserName { get; set; }
         public bool UserName_OverrideForStore { get; set; }
-
 
         [NopResourceDisplayName("Plugins.Payments.Klarna.Fields.Password")]
         public string? Password { get; set; }
@@ -81,8 +80,7 @@ namespace Nop.Plugin.Payments.Klarna.Models
         public bool KlarnaApiUrl_OverrideForStore { get; set; }
 
 
-
-
+        // For Klarna Playground Api
         public string? PlaygroundUserName { get; set; }
         public bool PlaygroundUserName_OverrideForStore { get; set; }
 
@@ -92,6 +90,7 @@ namespace Nop.Plugin.Payments.Klarna.Models
         public string? playgroundKlarnaApiUrl { get; set; }
         public bool PlaygroundKlarnaApiUrl_OverrideForStore { get; set; }
 
+        // Check if you want to use playground
         public bool UsePlayground { get; set; }
         public bool Playground_OverrideForStore { get; set; }
     }

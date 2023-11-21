@@ -67,7 +67,6 @@ namespace Nop.Plugin.Payments.Klarna
             this._klarnaPaymentSettings = klarnaPaymentSettings;
             this._storeContext = storeContext;
         }
-        //TODO passar a not implemented
         public async Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
 
@@ -75,8 +74,6 @@ namespace Nop.Plugin.Payments.Klarna
             {
                 NewPaymentStatus = PaymentStatus.Pending
             };
-
-           
 
             return processPaymentResult;
         }
@@ -170,17 +167,6 @@ namespace Nop.Plugin.Payments.Klarna
         {
             List<string> stringList = new List<string>();
             var selectedType = await this.GetSelectedType(form["SelectedType"].ToString());
-            //var validationResult = new Services.PaymentInfoValidator(this._localizationService).Validate(new PaymentInfoModel()
-            //{
-            //    SelectedType = selectedType,
-            //    Name = (string)form["Name"],
-            //    Email = (string)form["Email"],
-            //    Phone = (string)form["Phone"],
-            //    PhoneIndicative = (string)form["PhoneIndicative"],
-            //    FiscalNumber = (string)form["FiscalNumber"]
-            //});
-            //if (!validationResult.IsValid)
-            //    stringList.AddRange(validationResult.Errors.Select<ValidationFailure, string>((Func<ValidationFailure, string>)(error => error.ErrorMessage)));
             return (IList<string>)stringList;
         }
 
