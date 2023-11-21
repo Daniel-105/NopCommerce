@@ -3,9 +3,6 @@
 
 @{
     Layout = "";
-    //Html.AddScriptParts(ResourceLocation.Footer, Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsScriptPath, excludeFromBundle: true);
-    //Html.AddCssFileParts(Nop.Plugin.Payments.Qualpay.QualpayDefaults.EmbeddedFieldsStylePath, excludeFromBundle: true);
-
     @inject INopHtmlHelper NopHtml
 
     NopHtml.AppendPageCssClassParts("html-shopping-cart-page");
@@ -35,7 +32,8 @@
     <div id="klarnaRequest" class="klarnaBtn">Klarna Payment</div>
 </div>
 
-@* <div class="section order-summary">
+@* TODO: Uncomment this and see if the table is styled correctly
+    <div class="section order-summary">
     <div class="title">
         <strong>@T("Checkout.OrderSummary")</strong>
     </div>
@@ -66,21 +64,27 @@
     });
 
     $(document).ready(function () {
-        console.log("You clicked the button");
+        // console.log("You clicked the button");
         $.ajax({
             type: "POST",
             url: "/GetClientToken",
             success: function (data) {
-                dataResponse = JSON.parse(data.ResponseContent);
-                jsonDataC = JSON.parse(data.jsonData);
-                jsonStringData = data.jsonData;
-                let client_token = dataResponse.client_token;
-                let identifier = dataResponse.payment_method_categories[0].identifier;
-                console.log(dataResponse);
-                console.log(jsonDataC);
-                console.log(client_token);
-                console.log(identifier);
-                createSession(client_token, identifier);
+
+                if (data.ResponseContent == undefined) {
+                    alert("Há algo de errado com o método de pagamento que escolheu. Por favor contacte o administrador da loja, ou escolha outro método de pagamento");
+                    window.location = "/";
+                } else {
+                    dataResponse = JSON.parse(data.ResponseContent);
+                    jsonDataC = JSON.parse(data.jsonData);
+                    jsonStringData = data.jsonData;
+                    let client_token = dataResponse.client_token;
+                    let identifier = dataResponse.payment_method_categories[0].identifier;
+                    // console.log(dataResponse);
+                    // console.log(jsonDataC);
+                    // console.log(client_token);
+                    // console.log(identifier);
+                    createSession(client_token, identifier);
+                }
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.error("An error occurred:", errorThrown);
@@ -95,7 +99,7 @@
             Klarna.Payments.init({
                 client_token: client_token
             });
-            console.log("Payments initialized");
+            // console.log("Payments initialized");
             //The following method loads the payment_method_category in the container with the id of 'klarna_container'
             Klarna.Payments.load({
                 container: '#klarna_container',
@@ -103,17 +107,13 @@
 
             },
                 function (res) {
-                    console.log("Load function called")
-                    console.debug(res);
+                    // console.log("Load function called")
+                    // console.debug(res);
                     jsonDataResponse = res;
                 });
         };
         klarnaAsyncCallback();
     }
-
-
-    console.log(`jsonData: ${jsonDataC}`);
-
 
     klarnaRequest.addEventListener("click", () => {
 
@@ -121,10 +121,10 @@
             payment_method_category: 'pay_later'
         }, jsonStringData,
             function (res) {
-                console.log("Response from the authorize call:");
-                console.log(res);
+                // console.log("Response from the authorize call:");
+                // console.log(res);
                 authorizationToken = res["authorization_token"];
-                console.log(authorizationToken);
+                // console.log(authorizationToken);
                 if (authorizationToken) {
                     confirm();
                 } else {
@@ -135,7 +135,7 @@
     });
 
     function confirm() {
-        console.log(authorizationToken);
+        // console.log(authorizationToken);
         let data = { "authorizationToken": authorizationToken }
         $.ajax({
             type: "POST",
@@ -144,10 +144,10 @@
             dataType: "text",
             success: function (response) {
                 let parsedReponse = JSON.parse(JSON.parse(response));
-                console.log(response);
+                // console.log(response);
 
-                console.log(typeof parsedReponse);
-                console.log(parsedReponse.fraud_status);
+                // console.log(typeof parsedReponse);
+                // console.log(parsedReponse.fraud_status);
                 if (parsedReponse.fraud_status == "ACCEPTED") {
                     sendToPaymentProcessor();
                 } else {

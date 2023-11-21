@@ -6,10 +6,7 @@
 
 @await Component.InvokeAsync("StoreScopeConfiguration")
 
-
 <style>
-
-
     button {
         margin: 20px;
         margin-left:0px;
@@ -64,10 +61,6 @@
         .btn-16:active {
             top: 2px;
         }
-
-        .ml {
-            margin-left:10px;
-        }
 </style>
 
 <form asp-controller="PaymentKlarna" asp-action="Configure" method="post">
@@ -76,12 +69,19 @@
             <div class="panel-body">
                 <div style="display:flex; flex-direction:column;">
                     <div style="display:flex;">
-                        @* TODO: create a property in the ConfigurationModel  *@
-                        <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;" asp-for="Playground_OverrideForStore" asp-input="UsePlayground"/>
-                        @* <nop-override-store-checkbox asp-for="Playground_OverrideForStore" asp-input="UsePlayground"  /> *@
-                        <label for="usePlayground">Use Playground</label>
-                        @* <nop-override-store-checkbox asp-for="UsePlayground" asp-input="UsePlayground" asp-store-scope="@Model.UsePlayground" /> *@
+
+                        @if (Model.UsePlayground == true)
+                        {
+                            <input type="checkbox" checked id="usePlayground" name="usePlayground" style="margin-right:10px;" asp-for="Playground_OverrideForStore" asp-input="UsePlayground" />
+                            <label for="usePlayground">Use Playground</label>
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="usePlayground" name="usePlayground" style="margin-right:10px;" asp-for="Playground_OverrideForStore" asp-input="UsePlayground" />
+                            <label for="usePlayground">Use Playground</label>
+                        }
                     </div>
+
 
                         @if(Model.UsePlayground == true)
                         {
@@ -91,6 +91,8 @@
                         {
                             <div>(Currently using Real Api)</div>
                         }
+
+
                     <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
                         <h1>Klarna Payment Credentials</h1>
 
@@ -112,6 +114,8 @@
                             <span asp-validation-for="KlarnaApiUrl"></span>
                         </div>
                     </div>
+
+
                     <div id="playgroundCredentialsDiv" style="display:none;flex-direction:column;">
                         <h1>Playground Klarna Payment Credentials</h1>
 
@@ -133,6 +137,7 @@
                             <span asp-validation-for="playgroundKlarnaApiUrl"></span>
                         </div>
                     </div>
+
                     <button class="custom-btn btn-16">Submit</button>
 
                 </div>
@@ -145,6 +150,15 @@
     let usePlayground = document.querySelector('#usePlayground');
     let playgroundCredentialsDiv = document.querySelector('#playgroundCredentialsDiv');
     let realCredentialsDiv = document.querySelector('#realCredentialsDiv');
+
+    if (usePlayground.checked) {
+        playgroundCredentialsDiv.style.display = "flex";
+        realCredentialsDiv.style.display = "none";
+    } else {
+        playgroundCredentialsDiv.style.display = "none";
+        realCredentialsDiv.style.display = "flex";
+    }
+
     usePlayground.addEventListener("change", () => {
         if (usePlayground.checked) {
             playgroundCredentialsDiv.style.display = "flex";
@@ -154,7 +168,4 @@
             realCredentialsDiv.style.display = "flex";
         }
     });
-
-
-
 </script>
