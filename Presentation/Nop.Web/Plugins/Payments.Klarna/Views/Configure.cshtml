@@ -18,13 +18,17 @@
                     </div>
                     <div id="realCredentialsDiv" style="display:flex;flex-direction:column;">
                         <h1>Klarna Payment Credentials</h1>
+                        <h1>@Model.UserName</h1>
 
-
-
-                        <div class="col-md-9">
-                            <label for="paygroundUserName">UserName</label>
-                            <nop-editor asp-for="UserName" />
-                            <span asp-validation-for="UserName"></span>
+                        <div class="form-group">
+                            <div class="col-md-3"> 
+@*                                 <nop-override-store-checkbox asp-for="UserName_OverrideForStore" asp-input="UserName"  />
+ *@                                <nop-label asp-for="UserName" />
+                            </div>
+                            <div class="col-md-3">
+                                <nop-editor asp-for="UserName" />
+                                <span asp-validation-for="UserName"></span>
+                            </div>
                         </div>
 
 
@@ -41,6 +45,7 @@
                             <span asp-validation-for="KlarnaApiUrl"></span>
                         </div>
 
+                        <button>Submit</button>
 
 
                         @*                         <label for="RealPassword">Password</label>
@@ -58,7 +63,6 @@
                     </div>
                 </div>
             </div>
-            <button>Submit</button>
         </div>
 </form>
 
@@ -76,6 +80,7 @@
             realCredentialsDiv.style.display = "flex";
         }
     });
+
 
 
 </script>

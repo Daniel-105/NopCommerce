@@ -67,13 +67,16 @@ namespace Nop.Plugin.Payments.Klarna.Models
 
 
         // For Klarna
+        [NopResourceDisplayName("Plugins.Payments.Klarna.Fields.UserName")]
         public string UserName { get; set; }
         public bool UserName_OverrideForStore { get; set; }
 
 
-        public bool Password_OverrideForStore { get; set; }
+        [NopResourceDisplayName("Plugins.Payments.Klarna.Fields.Password")]
         public string Password { get; set; }
+        public bool Password_OverrideForStore { get; set; }
         
+        [NopResourceDisplayName("Plugins.Payments.Klarna.Fields.KlarnaApiUrl")]
         public string KlarnaApiUrl { get; set; }
         public bool KlarnaApiUrl_OverrideForStore { get; set; }
     }

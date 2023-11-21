@@ -41,6 +41,17 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
         private readonly IWorkContext _workContext;
         private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
         private readonly KlarnaPaymentSettings _klarnaPaymentSettings;
+        private readonly ILocalizationService _localizationService;
+
+
+        private readonly IPermissionService _permissionService;
+
+
+        private readonly ISettingService _settingService;
+
+
+        private readonly IStoreContext _storeContext;
+
         public PaymentKlarnaController(ILocalizationService localizationService,
             IPermissionService permissionService,
             KlarnaPaymentSettings klarnaPaymentSettings,
@@ -81,8 +92,8 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 // Populating the model
                 ConfigurationModel configurationModel = new ConfigurationModel
                 {
-                    // using the klarnaPaymentSettings model and binding it with the AdditionalFee
-                    // of the ConfigurationModel
+                    //using the klarnaPaymentSettings model and binding it with the AdditionalFee
+                    //of the ConfigurationModel
                     AdditionalFee = klarnaPaymentSettings.AdditionalFee,
                     AdditionalFeePercentage = klarnaPaymentSettings.AdditionalFeePercentage,
                     ActiveStoreScopeConfiguration = activeStoreScopeConfiguration,
@@ -148,7 +159,9 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             }
             else
             {
-                bool flag2 = !base.ModelState.IsValid;
+                // In case the credentials aren't been saved in the database, the commented line was that line that was there before
+                //bool flag2 = !base.ModelState.IsValid;
+                bool flag2 = model == null;
                 if (flag2)
                 {
                     result = await this.Configure();
@@ -156,38 +169,46 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 else
                 {
                     int activeStoreScopeConfiguration = await this._storeContext.GetActiveStoreScopeConfigurationAsync();
+
+                    // O Problema está aqui, nesta linha. 
+                    // Por alguma razão os valores vêm nulos
                     KlarnaPaymentSettings klarnaPaymentSettings = await this._settingService.LoadSettingAsync<KlarnaPaymentSettings>(activeStoreScopeConfiguration);
-                    klarnaPaymentSettings.AdditionalFee = model.AdditionalFee;
-                    klarnaPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
-                    klarnaPaymentSettings.AccountId = model.AccountId;
-                    klarnaPaymentSettings.ApiKey = model.ApiKey;
-                    klarnaPaymentSettings.UseTestEnvironment = model.UseTestEnvironment;
-                    klarnaPaymentSettings.ActivateCreditCard = model.ActivateCreditCard;
-                    klarnaPaymentSettings.ActivateMBWay = model.ActivateMBWay;
-                    klarnaPaymentSettings.ActivateMultibanco = model.ActivateMultibanco;
-                    klarnaPaymentSettings.ActivateSantanderConsumer = model.ActivateSantanderConsumer;
-                    klarnaPaymentSettings.SantanderConsumerMin = model.SantanderConsumerMin;
-                    klarnaPaymentSettings.SantanderConsumerMax = model.SantanderConsumerMax;
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, decimal>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AdditionalFee, model.AdditionalFee_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AccountId, model.AccountId_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ApiKey, model.ApiKey_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UseTestEnvironment, model.UseTestEnvironment_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateCreditCard, model.ActivateCreditCard_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateMBWay, model.ActivateMBWay_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateMultibanco, model.ActivateMultibanco_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateSantanderConsumer, model.ActivateSantanderConsumer_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMin, model.SantanderConsumerMin_OverrideForStore, activeStoreScopeConfiguration, false);
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMax, model.SantanderConsumerMax_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //klarnaPaymentSettings.AdditionalFee = model.AdditionalFee;
+                    //klarnaPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
+                    //klarnaPaymentSettings.AccountId = model.AccountId;
+                    //klarnaPaymentSettings.ApiKey = model.ApiKey;
+                    //klarnaPaymentSettings.UseTestEnvironment = model.UseTestEnvironment;
+                    //klarnaPaymentSettings.ActivateCreditCard = model.ActivateCreditCard;
+                    //klarnaPaymentSettings.ActivateMBWay = model.ActivateMBWay;
+                    //klarnaPaymentSettings.ActivateMultibanco = model.ActivateMultibanco;
+                    //klarnaPaymentSettings.ActivateSantanderConsumer = model.ActivateSantanderConsumer;
+                    //klarnaPaymentSettings.SantanderConsumerMin = model.SantanderConsumerMin;
+                    //klarnaPaymentSettings.SantanderConsumerMax = model.SantanderConsumerMax;
 
 
+                    // for klarna
+                    klarnaPaymentSettings.UserName = model.UserName;
+                    klarnaPaymentSettings.Password = model.Password;
+                    klarnaPaymentSettings.KlarnaApiUrl = model.KlarnaApiUrl;
 
+
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, decimal>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AdditionalFee, model.AdditionalFee_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.AccountId, model.AccountId_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ApiKey, model.ApiKey_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UseTestEnvironment, model.UseTestEnvironment_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateCreditCard, model.ActivateCreditCard_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateMBWay, model.ActivateMBWay_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateMultibanco, model.ActivateMultibanco_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, bool>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.ActivateSantanderConsumer, model.ActivateSantanderConsumer_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMin, model.SantanderConsumerMin_OverrideForStore, activeStoreScopeConfiguration, false);
+                    //await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, int>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.SantanderConsumerMax, model.SantanderConsumerMax_OverrideForStore, activeStoreScopeConfiguration, false)null;
 
 
                     //For Klarna
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.KlarnaApiUrl, model.KlarnaApiUrl_OverrideForStore, activeStoreScopeConfiguration, false );
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UserName, model.UserName_OverrideForStore, activeStoreScopeConfiguration, false );
-                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.Password, model.Password_OverrideForStore, activeStoreScopeConfiguration, false );
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.KlarnaApiUrl, model.KlarnaApiUrl_OverrideForStore, activeStoreScopeConfiguration, false);
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.UserName, model.UserName_OverrideForStore, activeStoreScopeConfiguration, false);
+                    await this._settingService.SaveSettingOverridablePerStoreAsync<KlarnaPaymentSettings, string>(klarnaPaymentSettings, (KlarnaPaymentSettings x) => x.Password, model.Password_OverrideForStore, activeStoreScopeConfiguration, false);
 
                     await this._settingService.ClearCacheAsync();
 
@@ -198,8 +219,9 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 //_configurationModel.KlarnaApiUrl = model.KlarnaApiUrl;
                 //_configurationModel.UserName = model.UserName;
                 //_configurationModel.Password = model.Password;
-                  TempData["ConfigurationModel"] = model;
-                var kalrna = model.KlarnaApiUrl;
+                //  TempData["ConfigurationModel"] = model;
+                //var kalrna = model.KlarnaApiUrl;
+
             }
             return result;
         }
@@ -217,11 +239,14 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 string username = "PK131523_f3731dbad121";
                 string password = "qSNhaFgn6Ls3bj1P";
 
-                var klarnaApi = await _settingService.GetSettingAsync("KlarnaApiUrl");
-                // var myModel= TempData["ConfigurationModel"] as ConfigurationModel;
-                //var klarnaApi = myModel.KlarnaApiUrl;
 
+                int activeStoreScopeConfiguration = await this._storeContext.GetActiveStoreScopeConfigurationAsync();
+                KlarnaPaymentSettings klarnaPaymentSettings = await this._settingService.LoadSettingAsync<KlarnaPaymentSettings>(activeStoreScopeConfiguration);
 
+                var a = klarnaPaymentSettings.KlarnaApiUrl;
+
+                //var klarna = _configurationModel.KlarnaApiUrl;
+                //var klarna2 = configurationModel.KlarnaApiUrl;
 
 
                 var store = await _storeContext.GetCurrentStoreAsync();
@@ -393,20 +418,10 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 return null;
             }
         }
-        private readonly ILocalizationService _localizationService;
-
-
-        private readonly IPermissionService _permissionService;
-
-
-        private readonly ISettingService _settingService;
-
-
-        private readonly IStoreContext _storeContext;
 
         //public string KlarnaAPI { get; private set; }
         //public string KlarnaUserName { get; private set; }
         //public string KlarnaPassword { get; private set; }
-        public readonly ConfigurationModel _configurationModel;
+        //public readonly ConfigurationModel _configurationModel;
     }
 }
