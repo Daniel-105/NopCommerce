@@ -187,6 +187,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
 
 
                     // for klarna
+
                     klarnaPaymentSettings.UserName = model.UserName;
                     klarnaPaymentSettings.Password = model.Password;
                     klarnaPaymentSettings.KlarnaApiUrl = model.KlarnaApiUrl;
