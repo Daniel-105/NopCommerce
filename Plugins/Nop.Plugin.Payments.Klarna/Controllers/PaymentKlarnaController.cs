@@ -141,7 +141,7 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
             }
             else
             {
-                // In case the credentials aren't been saved in the database, the commented line was that line that was there before
+                // In case credentials aren't been saved in the database, the commented line was that line that was there before
                 //bool flag2 = !base.ModelState.IsValid;
                 bool flag2 = model == null;
                 if (flag2)
@@ -405,10 +405,5 @@ namespace Nop.Plugin.Payments.Klarna.Controllers
                 return null;
             }
         }
-
-        //public string KlarnaAPI { get; private set; }
-        //public string KlarnaUserName { get; private set; }
-        //public string KlarnaPassword { get; private set; }
-        //public readonly ConfigurationModel _configurationModel;
     }
 }
