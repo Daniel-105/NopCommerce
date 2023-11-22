@@ -16,16 +16,16 @@ namespace Nop.Plugin.Payments.Klarna
         public bool ActivateMultibanco { get; set; }
 
         public bool ActivateCreditCard { get; set; }
-        public bool ActivateSantanderConsumer { get; set; }
-        public int SantanderConsumerMin { get; set; }
-        public int SantanderConsumerMax { get; set; }
 
         public bool AdditionalFeePercentage { get; set; }
 
         public Decimal AdditionalFee { get; set; }
-        public bool EnableFeature { get; internal set; }
-        public string Name { get; internal set; }
-        public string DescriptionText { get; internal set; }
+
+
+
+
+        // Check if you want to use playground
+        public bool UsePlayground { get; set; }
 
 
         // For Klarna Real Api
@@ -39,7 +39,5 @@ namespace Nop.Plugin.Payments.Klarna
         public string PaygroundPassword { get; set; }
         public string playgroundKlarnaApiUrl { get; set; }
 
-        // Check if you want to use playground
-        public bool UsePlayground { get; set; }
     }
 }
